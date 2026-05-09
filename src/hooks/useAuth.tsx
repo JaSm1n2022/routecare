@@ -159,6 +159,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user: session?.user?.email
       })
 
+      // On page refresh, SIGNED_IN fires first but session isn't ready yet
+      // Wait for INITIAL_SESSION which fires when session is fully loaded
+      // Only exception: if this is a magic link (hasAuthTokens), process SIGNED_IN
+      if (event === 'SIGNED_IN' && !hasAuthTokens) {
+        console.log('⏭️ Skipping early SIGNED_IN - waiting for INITIAL_SESSION')
+        return
+      }
+
       // Update state
       setSession(session)
       setUser(session?.user ?? null)
@@ -209,54 +217,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     console.log('✅ Auth listener set up')
 
     // If this is a magic link, wait for onAuthStateChange to handle it
-    // Otherwise, check for existing session
+    // Otherwise, manually trigger session check to ensure onAuthStateChange fires
     if (!hasAuthTokens) {
-      console.log('🔍 Checking for existing session...')
-      supabase.auth.getSession().then(async ({ data: { session: initialSession }, error }) => {
-        if (!isMounted) return
-
-        if (error) {
-          console.error('❌ Error getting session:', error)
-          setLoading(false)
-          return
-        }
-
-        console.log('📦 Initial session check:', !!initialSession, initialSession?.user?.email)
-
-        if (initialSession?.user) {
-          console.log('✅ Found existing session, loading data...')
-          setSession(initialSession)
-          setUser(initialSession.user)
-
-          // Fetch profile and employee data
-          try {
-            console.log('🔄 Fetching profile and employee for:', initialSession.user.email)
-            const results = await Promise.allSettled([
-              fetchProfile(initialSession.user.id),
-              fetchEmployee(initialSession.user.email || '')
-            ])
-
-            console.log('📊 Initial fetch results:', {
-              profile: results[0].status,
-              employee: results[1].status
-            })
-          } catch (err) {
-            console.error('❌ Error in initial fetch:', err)
-          }
-
-          console.log('✅ Initial data fetch complete')
-          if (safetyTimeout) clearTimeout(safetyTimeout)
-          setLoading(false)
-        } else {
-          console.log('ℹ️ No initial session found')
-          setLoading(false)
-        }
+      console.log('🔍 No magic link - triggering session check...')
+      // Call getSession() to ensure onAuthStateChange fires with INITIAL_SESSION
+      // This is necessary because sometimes the listener doesn't fire automatically on page refresh
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        console.log('📦 Manual session check result:', !!session, session?.user?.email)
+        // Don't set state here - let onAuthStateChange handle it
+        // This call just ensures the listener fires
       }).catch(err => {
-        console.error('❌ Error getting initial session:', err)
-        setLoading(false)
+        console.error('❌ Error in manual session check:', err)
       })
     } else {
-      console.log('⏳ Waiting for magic link to be processed...')
+      console.log('⏳ Waiting for magic link to be processed by onAuthStateChange...')
     }
 
     // Set a safety timeout
