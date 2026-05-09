@@ -147,18 +147,26 @@ export function DashboardPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <HamburgerMenu />
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-                  {t('dashboard.welcome')}, {employee?.first_name || authUser?.email?.split('@')[0]}
-                </h1>
-                <p className="text-sm text-gray-600 mt-1">
-                  {employee?.position || 'Clinician'} • {new Date().toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </p>
+              <div className="flex flex-col items-center">
+                <img
+                  src="/images/myroutecare.png"
+                  alt="MyRouteCare Logo"
+                  className="h-12 w-auto mb-2"
+                  style={{ mixBlendMode: 'multiply' }}
+                />
+                <div className="text-center">
+                  <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+                    {employee?.name || authUser?.email?.split('@')[0]}
+                  </h1>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {employee?.position || 'Clinician'} • {new Date().toLocaleDateString('en-US', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </p>
+                </div>
               </div>
             </div>
           </div>

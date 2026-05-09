@@ -12,8 +12,7 @@ import {
   MapPin,
   Package,
   TrendingUp,
-  DollarSign,
-  Heart
+  DollarSign
 } from 'lucide-react'
 
 export function HamburgerMenu() {
@@ -66,13 +65,12 @@ export function HamburgerMenu() {
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-full flex items-center justify-center">
-                <Heart className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h2 className="font-bold text-gray-900">RouteCare</h2>
-                <p className="text-xs text-gray-600">{employee?.position || 'Clinician'}</p>
-              </div>
+              <img
+                src="/images/myroutecare.png"
+                alt="MyRouteCare Logo"
+                className="h-16 w-auto"
+                style={{ mixBlendMode: 'multiply' }}
+              />
             </div>
             <button
               onClick={() => setMenuOpen(false)}
@@ -92,7 +90,7 @@ export function HamburgerMenu() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-gray-900 truncate">
-                    {employee?.first_name || authUser?.email?.split('@')[0]}
+                    {employee?.name || authUser?.email?.split('@')[0]}
                   </p>
                   <p className="text-sm text-gray-600 truncate">{authUser?.email}</p>
                 </div>

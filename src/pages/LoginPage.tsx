@@ -1,6 +1,6 @@
 import { useState, FormEvent } from 'react'
 import { useAuth } from '../hooks/useAuth'
-import { Mail, Loader2, Heart } from 'lucide-react'
+import { Mail, Loader2 } from 'lucide-react'
 
 export function LoginPage() {
   const { signInWithEmail } = useAuth()
@@ -28,12 +28,16 @@ export function LoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo/Brand Section */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
-            <Heart className="w-8 h-8 text-white" />
+        <div className="text-center mb-6">
+          <div className="flex flex-col items-center">
+            <img
+              src="/images/myroutecare.png"
+              alt="MyRouteCare Logo"
+              className="h-32 w-auto"
+              style={{ mixBlendMode: 'multiply' }}
+            />
+            <p className="text-gray-600 text-sm font-bold -mt-4">Clinician Portal</p>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">RouteCare</h1>
-          <p className="text-gray-600">Clinician Portal</p>
         </div>
 
         {/* Login Card */}

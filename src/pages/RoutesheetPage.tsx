@@ -9,6 +9,58 @@ import { ArrowLeft, Save, X, Edit3, Type } from 'lucide-react'
 import dayjs from 'dayjs'
 import SignatureCanvas from 'react-signature-canvas'
 
+const CLIENT_SERVICES = [
+  { code: "IV", name: "Initial Visit", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "MSW", "Director of Nurse", "LPN", "Medical Director", "Chaplain"] },
+  { code: "PRN", name: "PRN", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse", "LPN", "Medical Director"] },
+  { code: "DC", name: "Discharge", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
+  { code: "SUP", name: "Supervisory Visit", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
+  { code: "HUV", name: "HUV", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
+  { code: "SFV", name: "SFV", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse", "LPN"] },
+  { code: "IDT-PR", name: "IDT Meeting In Person", isClientRequired: false, permission: ["*"] },
+  { code: "IDT-NT", name: "IDT Meeting Thru Notes", isClientRequired: false, permission: ["*"] },
+  { code: "IDT-PH", name: "IDT Meeting Via Phone", isClientRequired: false, permission: ["*"] },
+  { code: "OC", name: "On-Call", isClientRequired: false, permission: ["*"] },
+  { code: "RC", name: "Recertification Visit", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
+  { code: "SM", name: "Staff Meeting", isClientRequired: false, permission: ["*"] },
+  { code: "IN", name: "In-Service", isClientRequired: false, permission: ["*"] },
+  { code: "EV", name: "Evaluation Visit", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse", "Nurse Practioner"] },
+  { code: "SWV", name: "Social Worker Visit", isClientRequired: true, permission: ["MSW"] },
+  { code: "RV", name: "Regular Visit", isClientRequired: true, permission: ["Certified Nurse Assistant", "Case Manager", "Registered Nurse", "MSW", "Director of Nurse", "LPN", "Medical Director", "Chaplain"] },
+  { code: "BV", name: "Bereavement Visit", isClientRequired: true, permission: ["Chaplain", "Bereavement"] },
+  { code: "F/UV", name: "Follow Up Visit", isClientRequired: true, permission: ["Case Manager", "MSW", "Director of Nurse", "Registered Nurse", "LPN", "Medical Director", "Chaplain"] },
+  { code: "O", name: "Orientation", isClientRequired: false, permission: ["*"] },
+  { code: "VV", name: "Volunteer Visit", isClientRequired: true, permission: ["Volunteer"] },
+  { code: "DPV", name: "Death pronouncement", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
+  { code: "SOC", name: "SOC/Assessment", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
+  { code: "APV", name: "Admission Visit", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
+  { code: "REA", name: "Reassessment Visit", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
+  { code: "ATD", name: "Attendance", isClientRequired: false, permission: ["Administrative Manager", "Case Manager", "Director of Nurse", "Registered Nurse", "Office Manager", "Administrator"] },
+  { code: "OTH", name: "Other", isClientRequired: false, permission: ["*"] }
+]
+
+const COMMENT_OPTIONS = [
+  { value: '', label: '-- Select a Comment --' },
+  { value: 'Refused Visit', label: 'Refused Visit' },
+  { value: 'No One Answering', label: 'No One Answering' },
+  { value: 'Patient Hospitalized', label: 'Patient Hospitalized' },
+  { value: 'Patient Unavailable / Not Home', label: 'Patient Unavailable / Not Home' },
+  { value: 'Visit Rescheduled', label: 'Visit Rescheduled' },
+  { value: 'Patient Deceased', label: 'Patient Deceased' },
+  { value: 'Patient on Vacation / Out of Town', label: 'Patient on Vacation / Out of Town' },
+  { value: 'Caregiver Cancelled', label: 'Caregiver Cancelled' },
+  { value: 'Weather / Road Conditions', label: 'Weather / Road Conditions' },
+  { value: 'Wrong Address / Unable to Locate Patient', label: 'Wrong Address / Unable to Locate Patient' },
+  { value: 'Patient Transferred to Facility', label: 'Patient Transferred to Facility' },
+  { value: 'Visit Completed – No Issues', label: 'Visit Completed – No Issues' },
+  { value: 'HUV1', label: 'HUV1' },
+  { value: 'HUV2', label: 'HUV2' },
+  { value: 'Hope Admission', label: 'Hope Admission' },
+  { value: 'SFV1', label: 'SFV1' },
+  { value: 'SFV2', label: 'SFV2' },
+  { value: 'SFV Admission', label: 'SFV Admission' },
+  { value: 'Other', label: 'Other' }
+]
+
 interface Assignment {
   id: string
   patientCd: string
@@ -34,20 +86,29 @@ interface Contract {
 export function RoutesheetPage() {
   const navigate = useNavigate()
   const { employee, authUser } = useAuth()
-  const sigCanvasRef = useRef<any>(null)
+  const sigCanvasRef = useRef<SignatureCanvas>(null)
 
   // Form state
   const [patients, setPatients] = useState<string[]>([])
   const [selectedPatient, setSelectedPatient] = useState('')
-  const [service, setService] = useState('Regular Visit')
+  const [service, setService] = useState('')
+  const [availableServices, setAvailableServices] = useState<typeof CLIENT_SERVICES>([])
+  const [isClientRequired, setIsClientRequired] = useState(false)
   const [serviceDate, setServiceDate] = useState(dayjs().format('YYYY-MM-DD'))
   const [timeIn, setTimeIn] = useState(dayjs().format('HH:mm'))
   const [timeOut, setTimeOut] = useState(dayjs().add(45, 'minute').format('HH:mm'))
   const [mileage, setMileage] = useState(0)
-  const [notes, setNotes] = useState('')
+  const [comments, setComments] = useState('')
+  const [otherComments, setOtherComments] = useState('')
   const [signature, setSignature] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+
+  // Signature modal state
+  const [signatureModal, setSignatureModal] = useState(false)
+  const [signatureMode, setSignatureMode] = useState<'draw' | 'type'>('draw')
+  const [typedName, setTypedName] = useState('')
+  const [selectedFont, setSelectedFont] = useState('Dancing Script')
 
   // Data
   const [assignments, setAssignments] = useState<Assignment[]>([])
@@ -59,6 +120,21 @@ export function RoutesheetPage() {
     patient: '',
     signature: ''
   })
+
+  // Filter services based on employee position
+  useEffect(() => {
+    if (!employee?.position) return
+
+    const filtered = CLIENT_SERVICES.filter(s => {
+      if (s.permission.length === 1 && s.permission[0] === '*') {
+        return true
+      }
+      return s.permission.includes(employee.position)
+    })
+
+    setAvailableServices(filtered)
+    console.log('📋 Available services for', employee.position, ':', filtered)
+  }, [employee?.position])
 
   // Load assignments and contracts
   useEffect(() => {
@@ -122,9 +198,32 @@ export function RoutesheetPage() {
     }
   }
 
+  // Handle service change
+  const handleServiceChange = (serviceName: string) => {
+    setService(serviceName)
+
+    // Find the service to check if client is required
+    const selectedService = availableServices.find(s => s.name === serviceName)
+    setIsClientRequired(selectedService?.isClientRequired || false)
+
+    // If client not required, clear selected patient
+    if (!selectedService?.isClientRequired) {
+      setSelectedPatient('')
+    }
+
+    // Special handling for Attendance service - set time to 8am-5pm
+    if (serviceName === 'Attendance') {
+      setTimeIn('08:00')
+      setTimeOut('17:00')
+    }
+
+    console.log('📝 Service changed:', serviceName, 'Client required:', selectedService?.isClientRequired)
+  }
+
   // Update contract when patient or service changes
   useEffect(() => {
-    if (!selectedPatient || !service || !employee?.id) return
+    if (!service || !employee?.id) return
+    if (isClientRequired && !selectedPatient) return
 
     // Find contract for this patient and service
     let foundContract = contracts.find(
@@ -145,7 +244,7 @@ export function RoutesheetPage() {
 
     setContract(foundContract || null)
     console.log('💰 Contract found:', foundContract)
-  }, [selectedPatient, service, contracts, employee])
+  }, [selectedPatient, service, contracts, employee, isClientRequired])
 
   const handlePatientChange = (patientCd: string) => {
     setSelectedPatient(patientCd)
@@ -210,13 +309,25 @@ export function RoutesheetPage() {
     let isValid = true
     const newErrors = { patient: '', signature: '' }
 
-    if (!selectedPatient) {
-      newErrors.patient = 'Please select a patient'
+    if (!service) {
+      toast.error('Please select a service type')
+      isValid = false
+    }
+
+    // Only require patient if service requires it
+    if (isClientRequired && !selectedPatient) {
+      newErrors.patient = 'Please select a client'
       isValid = false
     }
 
     if (!signature) {
       newErrors.signature = 'Signature is required'
+      isValid = false
+    }
+
+    // Validate "Other" comments
+    if (comments === 'Other' && !otherComments.trim()) {
+      toast.error('Please specify other comment')
       isValid = false
     }
 
@@ -233,11 +344,15 @@ export function RoutesheetPage() {
 
       const estimatedPayment = calculateEstimatedPayment()
 
+      // Find service code
+      const selectedService = availableServices.find(s => s.name === service)
+      const serviceCode = selectedService?.code || service
+
       const routesheetData = {
         companyId: employee?.companyId,
-        patientCd: selectedPatient,
+        patientCd: selectedPatient || null,
         service: service,
-        serviceCd: service,
+        serviceCd: serviceCode,
         dosStart: combinedDosStart,
         dosEnd: combinedDosEnd,
         day: dayOfWeek,
@@ -259,10 +374,15 @@ export function RoutesheetPage() {
           : 0,
         estimatedPayment: estimatedPayment.toFixed(2),
         approvedPayment: estimatedPayment.toFixed(2),
-        comments: notes,
+        comments: comments === 'Other' ? `Other: ${otherComments}` : comments,
         signature_based: signature,
-        createdAt: new Date().toISOString(),
+        created_at: new Date().toISOString(),
         createdUser: {
+          name: authUser?.email || '',
+          userId: authUser?.id || '',
+          date: new Date().toISOString()
+        },
+        updatedUser: {
           name: authUser?.email || '',
           userId: authUser?.id || '',
           date: new Date().toISOString()
@@ -291,19 +411,54 @@ export function RoutesheetPage() {
     }
   }
 
-  const handleClear = () => {
+  const handleClearSignature = () => {
     setSignature(null)
+    setTypedName('')
     if (sigCanvasRef.current) {
       sigCanvasRef.current.clear()
     }
   }
 
-  const handleSaveSignature = () => {
-    if (sigCanvasRef.current) {
-      const dataURL = sigCanvasRef.current.toDataURL()
-      setSignature(dataURL)
-      setErrors({ ...errors, signature: '' })
+  const handleConfirmSignature = () => {
+    if (signatureMode === 'draw') {
+      if (sigCanvasRef.current && !sigCanvasRef.current.isEmpty()) {
+        const dataURL = sigCanvasRef.current.toDataURL('image/png')
+        setSignature(dataURL)
+        setSignatureModal(false)
+        setErrors({ ...errors, signature: '' })
+      } else {
+        toast.error('Please draw your signature')
+      }
+    } else if (signatureMode === 'type') {
+      if (typedName.trim()) {
+        // Create typed signature as image
+        const canvas = document.createElement('canvas')
+        canvas.width = 400
+        canvas.height = 150
+        const ctx = canvas.getContext('2d')
+        if (ctx) {
+          ctx.fillStyle = 'white'
+          ctx.fillRect(0, 0, canvas.width, canvas.height)
+          ctx.fillStyle = 'black'
+          ctx.font = `48px "${selectedFont}", cursive`
+          ctx.textAlign = 'center'
+          ctx.textBaseline = 'middle'
+          ctx.fillText(typedName, canvas.width / 2, canvas.height / 2)
+          const dataURL = canvas.toDataURL('image/png')
+          setSignature(dataURL)
+          setSignatureModal(false)
+          setErrors({ ...errors, signature: '' })
+        }
+      } else {
+        toast.error('Please type your name')
+      }
     }
+  }
+
+  const handleOpenSignatureModal = () => {
+    setSignatureModal(true)
+    setSignatureMode('draw')
+    setTypedName('')
   }
 
   if (loading) {
@@ -336,39 +491,36 @@ export function RoutesheetPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Patient Selection */}
+          {/* Service Selection - FIRST */}
           <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Patient Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <MobileSelect
-                  label="Patient"
-                  required
-                  value={selectedPatient}
-                  onChange={handlePatientChange}
-                  options={patients.map(p => ({ value: p, label: p }))}
-                  placeholder="Select Patient"
-                  error={!!errors.patient}
-                />
-                {errors.patient && (
-                  <p className="text-red-500 text-sm mt-1">{errors.patient}</p>
-                )}
-              </div>
+            <h2 className="text-lg font-semibold mb-4">Service Information</h2>
+            <div className="space-y-4">
+              <MobileSelect
+                label="Select Service Type"
+                required
+                value={service}
+                onChange={handleServiceChange}
+                options={availableServices.map(s => ({ value: s.name, label: s.name }))}
+                placeholder="-- Select Service Type --"
+              />
 
-              <div>
-                <MobileSelect
-                  label="Service Type"
-                  value={service}
-                  onChange={setService}
-                  options={[
-                    { value: 'Regular Visit', label: 'Regular Visit' },
-                    { value: 'Skilled Nursing', label: 'Skilled Nursing' },
-                    { value: 'Assessment', label: 'Assessment' },
-                    { value: 'Other', label: 'Other' }
-                  ]}
-                  placeholder="Select Service"
-                />
-              </div>
+              {/* Client Selection - Only if service requires it */}
+              {service && isClientRequired && (
+                <div>
+                  <MobileSelect
+                    label="Select Client"
+                    required
+                    value={selectedPatient}
+                    onChange={handlePatientChange}
+                    options={patients.map(p => ({ value: p, label: p }))}
+                    placeholder="-- Select Client --"
+                    error={!!errors.patient}
+                  />
+                  {errors.patient && (
+                    <p className="text-red-500 text-sm mt-1">{errors.patient}</p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -446,16 +598,38 @@ export function RoutesheetPage() {
             </div>
           )}
 
-          {/* Notes */}
+          {/* Comments */}
           <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Notes</h2>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Add any visit notes or comments..."
-            />
+            <h2 className="text-lg font-semibold mb-4">Comments (Optional)</h2>
+            <div className="space-y-4">
+              <MobileSelect
+                label=""
+                value={comments}
+                onChange={(value) => {
+                  setComments(value)
+                  if (value !== 'Other') {
+                    setOtherComments('')
+                  }
+                }}
+                options={COMMENT_OPTIONS}
+                placeholder="-- Select a Comment --"
+              />
+
+              {comments === 'Other' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Other Comment <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={otherComments}
+                    onChange={(e) => setOtherComments(e.target.value)}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Please specify..."
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Signature */}
@@ -466,10 +640,10 @@ export function RoutesheetPage() {
             <div className="border-2 border-gray-300 rounded-lg p-4">
               {signature ? (
                 <div>
-                  <img src={signature} alt="Signature" className="max-h-32" />
+                  <img src={signature} alt="Signature" className="max-h-32 mx-auto" />
                   <button
                     type="button"
-                    onClick={handleClear}
+                    onClick={handleClearSignature}
                     className="mt-2 text-sm text-red-600 hover:text-red-800"
                   >
                     Clear Signature
@@ -480,7 +654,7 @@ export function RoutesheetPage() {
                   <p className="text-gray-500 mb-4">Signature required</p>
                   <button
                     type="button"
-                    onClick={handleSaveSignature}
+                    onClick={handleOpenSignatureModal}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                   >
                     Add Signature
@@ -538,6 +712,154 @@ export function RoutesheetPage() {
           </div>
         </form>
       </div>
+
+      {/* Signature Modal */}
+      {signatureModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+              onClick={() => setSignatureModal(false)}
+            />
+
+            {/* Modal */}
+            <div className="relative inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+              <div className="absolute top-0 right-0 pt-4 pr-4">
+                <button
+                  type="button"
+                  onClick={() => setSignatureModal(false)}
+                  className="text-gray-400 hover:text-gray-500"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+
+              <div className="sm:flex sm:items-start">
+                <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                    Add Your Signature
+                  </h3>
+
+                  {/* Mode Toggle */}
+                  <div className="flex gap-2 mb-4">
+                    <button
+                      type="button"
+                      onClick={() => setSignatureMode('draw')}
+                      className={`flex-1 px-4 py-2 rounded-lg flex items-center justify-center gap-2 ${
+                        signatureMode === 'draw'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      <Edit3 className="w-4 h-4" />
+                      Draw
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSignatureMode('type')}
+                      className={`flex-1 px-4 py-2 rounded-lg flex items-center justify-center gap-2 ${
+                        signatureMode === 'type'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      <Type className="w-4 h-4" />
+                      Type
+                    </button>
+                  </div>
+
+                  {/* Draw Mode */}
+                  {signatureMode === 'draw' && (
+                    <div>
+                      <div className="border-2 border-gray-300 rounded-lg bg-white">
+                        <SignatureCanvas
+                          ref={sigCanvasRef}
+                          canvasProps={{
+                            className: 'w-full h-40',
+                            style: { touchAction: 'none' }
+                          }}
+                          backgroundColor="white"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => sigCanvasRef.current?.clear()}
+                        className="mt-2 text-sm text-gray-600 hover:text-gray-800"
+                      >
+                        Clear Canvas
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Type Mode */}
+                  {signatureMode === 'type' && (
+                    <div>
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Font Style
+                        </label>
+                        <select
+                          value={selectedFont}
+                          onChange={(e) => setSelectedFont(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="Dancing Script">Dancing Script</option>
+                          <option value="Pacifico">Pacifico</option>
+                          <option value="Great Vibes">Great Vibes</option>
+                          <option value="Allura">Allura</option>
+                        </select>
+                      </div>
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Type Your Name
+                        </label>
+                        <input
+                          type="text"
+                          value={typedName}
+                          onChange={(e) => setTypedName(e.target.value)}
+                          placeholder="Enter your full name"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                      {typedName && (
+                        <div className="border-2 border-gray-300 rounded-lg p-4 bg-white text-center">
+                          <p
+                            style={{
+                              fontFamily: `"${selectedFont}", cursive`,
+                              fontSize: '32px'
+                            }}
+                          >
+                            {typedName}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse gap-3">
+                    <button
+                      type="button"
+                      onClick={handleConfirmSignature}
+                      className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto sm:text-sm"
+                    >
+                      Confirm Signature
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSignatureModal(false)}
+                      className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   )
 }

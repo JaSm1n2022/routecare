@@ -13,8 +13,9 @@ export interface Employee {
   company_id: string
   position: string
   status: 'active' | 'inactive'
-  first_name: string | null
-  last_name: string | null
+  name: string | null
+  first_name?: string | null
+  last_name?: string | null
   phone: string | null
   created_at: string
   updated_at: string

@@ -22,7 +22,11 @@ export function Layout({ children }: LayoutProps) {
           >
             <Menu className="w-6 h-6 text-gray-700" />
           </button>
-          <h1 className="text-lg font-semibold text-gray-900">RouteCare</h1>
+          <img
+            src="/images/myroutecare.png"
+            alt="MyRouteCare Logo"
+            className="h-8 w-auto"
+          />
           <button className="p-2 rounded-lg hover:bg-gray-100 relative">
             <Bell className="w-6 h-6 text-gray-700" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
@@ -33,13 +37,21 @@ export function Layout({ children }: LayoutProps) {
         {mobileMenuOpen && (
           <div className="border-t border-gray-200 bg-white">
             <div className="p-4 border-b border-gray-100">
+              <div className="flex justify-center mb-4">
+                <img
+                  src="/images/myroutecare.png"
+                  alt="MyRouteCare Logo"
+                  className="h-16 w-auto"
+                  style={{ mixBlendMode: 'multiply' }}
+                />
+              </div>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
                   <User className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <p className="font-medium text-gray-900">
-                    {employee?.first_name || authUser?.email?.split('@')[0]}
+                    {employee?.name || authUser?.email?.split('@')[0]}
                   </p>
                   <p className="text-sm text-gray-600">{employee?.position || 'Clinician'}</p>
                 </div>
@@ -62,7 +74,11 @@ export function Layout({ children }: LayoutProps) {
       <aside className="hidden lg:block fixed inset-y-0 left-0 w-64 bg-white border-r border-gray-200">
         <div className="flex flex-col h-full">
           <div className="p-6 border-b border-gray-200">
-            <h1 className="text-xl font-bold text-gray-900">RouteCare</h1>
+            <img
+              src="/images/myroutecare.png"
+              alt="MyRouteCare Logo"
+              className="h-12 w-auto mb-2"
+            />
             <p className="text-sm text-gray-600 mt-1">Clinician Portal</p>
           </div>
 
@@ -74,7 +90,7 @@ export function Layout({ children }: LayoutProps) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-gray-900 truncate">
-                    {employee?.first_name || authUser?.email?.split('@')[0]}
+                    {employee?.name || authUser?.email?.split('@')[0]}
                   </p>
                   <p className="text-sm text-gray-600 truncate">{employee?.position || 'Clinician'}</p>
                 </div>
