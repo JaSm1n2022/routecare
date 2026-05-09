@@ -1,0 +1,41 @@
+{
+  "header": {
+    "navigation": "Navigation",
+    "language": "Language",
+    "quickActions": "Quick Actions"
+  },
+  "navigation": {
+    "home": "Home",
+    "profile": "Profile"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome",
+    "assignedPatients": "Assigned Patients",
+    "scheduledVisits": "Scheduled Visits",
+    "completedVisits": "Completed Visits",
+    "estimatedPayment": "Estimated Visit Payment",
+    "actualEarnings": "This Week's Earnings",
+    "thisWeek": "This Week",
+    "noActivePatients": "No Active Patients"
+  },
+  "quickActions": {
+    "routesheet": "Route Sheet",
+    "pickup": "Pickup",
+    "delivery": "Delivery",
+    "serviceEarnings": "Service Earnings",
+    "routesheetDesc": "View today's schedule",
+    "pickupDesc": "Log equipment pickup",
+    "deliveryDesc": "Record delivery",
+    "earningsDesc": "View earnings details"
+  },
+  "auth": {
+    "signOut": "Sign Out",
+    "signIn": "Sign In"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  }
+}

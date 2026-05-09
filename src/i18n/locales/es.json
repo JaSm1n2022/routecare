@@ -1,0 +1,41 @@
+{
+  "header": {
+    "navigation": "Navegación",
+    "language": "Idioma",
+    "quickActions": "Acciones Rápidas"
+  },
+  "navigation": {
+    "home": "Inicio",
+    "profile": "Perfil"
+  },
+  "dashboard": {
+    "title": "Panel de Control",
+    "welcome": "Bienvenido",
+    "assignedPatients": "Pacientes Asignados",
+    "scheduledVisits": "Visitas Programadas",
+    "completedVisits": "Visitas Completadas",
+    "estimatedPayment": "Pago Estimado de Visitas",
+    "actualEarnings": "Ganancias de Esta Semana",
+    "thisWeek": "Esta Semana",
+    "noActivePatients": "Sin Pacientes Activos"
+  },
+  "quickActions": {
+    "routesheet": "Hoja de Ruta",
+    "pickup": "Recoger",
+    "delivery": "Entrega",
+    "serviceEarnings": "Ganancias de Servicio",
+    "routesheetDesc": "Ver horario de hoy",
+    "pickupDesc": "Registrar recogida de equipo",
+    "deliveryDesc": "Registrar entrega",
+    "earningsDesc": "Ver detalles de ganancias"
+  },
+  "auth": {
+    "signOut": "Cerrar Sesión",
+    "signIn": "Iniciar Sesión"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito"
+  }
+}
