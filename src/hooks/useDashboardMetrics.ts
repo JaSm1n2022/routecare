@@ -3,12 +3,23 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 import { getThisWeekDateRange, formatDateForSupabase } from '../utils/dateHelpers'
 
+interface Assignment {
+  id: string
+  patientCd: string
+  frequencyVisit: string
+  visitType: string
+  dayOfTheWeek: string[]
+  timeOfVisit: string
+  disciplineId: string
+}
+
 interface DashboardMetrics {
   assignedPatients: number
   scheduledVisits: number
   completedVisits: number
   estimatedPayment: number
   actualEarnings: number
+  assignments: Assignment[]
   loading: boolean
   error: string | null
 }
@@ -21,6 +32,7 @@ export function useDashboardMetrics(): DashboardMetrics {
     completedVisits: 0,
     estimatedPayment: 0,
     actualEarnings: 0,
+    assignments: [],
     loading: true,
     error: null
   })
@@ -264,6 +276,7 @@ export function useDashboardMetrics(): DashboardMetrics {
         completedVisits,
         estimatedPayment,
         actualEarnings,
+        assignments,
         loading: false,
         error: null
       })

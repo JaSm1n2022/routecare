@@ -210,55 +210,48 @@ export function DashboardPage() {
           </div>
         </div>
 
-        {/* This Week's Schedule */}
+        {/* Patient Assignments */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">{t('dashboard.scheduledVisits')} - {t('dashboard.thisWeek')}</h2>
-            <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
-              View All
-            </button>
+            <h2 className="text-lg font-semibold text-gray-900">My Patient Assignments</h2>
+            <span className="text-sm text-gray-500">{metrics.assignments.length} {metrics.assignments.length === 1 ? 'patient' : 'patients'}</span>
           </div>
-          <div className="space-y-4">
-            {/* Sample schedule items */}
-            <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-              <div className="flex-shrink-0 w-20 text-center">
-                <p className="text-xs text-gray-500 font-medium">MON</p>
-                <p className="text-lg font-bold text-gray-900">9:00</p>
-                <p className="text-xs text-gray-500">AM</p>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-900">Morning Visit - Patient A</p>
-                <p className="text-sm text-gray-600 mt-1">123 Main St, City, ST 12345</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    Scheduled
-                  </span>
-                  <span className="text-xs text-gray-500">$90 est.</span>
+          <div className="space-y-3">
+            {metrics.assignments.length > 0 ? (
+              metrics.assignments.map((assignment) => (
+                <div key={assignment.id} className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900 mb-2">{assignment.patientCd}</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
+                        <div>
+                          <span className="text-gray-600">Frequency:</span>
+                          <span className="ml-2 font-medium text-gray-900">{assignment.frequencyVisit}x/{assignment.visitType}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">Days:</span>
+                          <span className="ml-2 font-medium text-gray-900">
+                            {Array.isArray(assignment.dayOfTheWeek)
+                              ? assignment.dayOfTheWeek.join(', ')
+                              : assignment.dayOfTheWeek}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">Time:</span>
+                          <span className="ml-2 font-medium text-gray-900">
+                            {assignment.timeOfVisit || 'Not specified'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500">No patient assignments found</p>
               </div>
-            </div>
-
-            <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-              <div className="flex-shrink-0 w-20 text-center">
-                <p className="text-xs text-gray-500 font-medium">TUE</p>
-                <p className="text-lg font-bold text-gray-900">11:30</p>
-                <p className="text-xs text-gray-500">AM</p>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-900">Assessment - Patient B</p>
-                <p className="text-sm text-gray-600 mt-1">456 Oak Ave, City, ST 12345</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    Scheduled
-                  </span>
-                  <span className="text-xs text-gray-500">$120 est.</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="text-center py-4 border-t border-gray-200">
-              <p className="text-sm text-gray-500">+ 3 more visits this week</p>
-            </div>
+            )}
           </div>
         </div>
       </div>
