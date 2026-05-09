@@ -603,16 +603,17 @@ export function RoutesheetPage() {
                 </label>
                 <input
                   type="number"
-                  value={mileage}
+                  value={mileage || ''}
                   onChange={(e) => setMileage(parseFloat(e.target.value) || 0)}
                   step="0.1"
                   min="0"
+                  placeholder="Enter miles"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
                 {contract.mileageRate && (
-                  <p className="text-sm text-gray-600 mt-1">
-                    Rate: ${contract.mileageRate}/mile (Max: $
-                    {contract.maxReimbursement || 0})
+                  <p className="text-sm text-gray-600 mt-2">
+                    Rate: ${contract.mileageRate.toFixed(2)}/mile
+                    {contract.maxReimbursement && ` (Max: $${contract.maxReimbursement.toFixed(2)})`}
                   </p>
                 )}
               </div>
@@ -697,9 +698,32 @@ export function RoutesheetPage() {
               <p className="text-3xl font-bold text-green-900">
                 ${calculateEstimatedPayment().toFixed(2)}
               </p>
-              <p className="text-sm text-green-700 mt-2">
-                Service Rate: ${contract.serviceRate} ({contract.serviceRateType || 'flat'})
-              </p>
+              <div className="mt-3 space-y-1">
+                <p className="text-sm text-green-700">
+                  Service: ${(() => {
+                    let servicePayment = parseFloat(contract.serviceRate?.toString() || '0')
+                    if (contract.serviceRateType?.toLowerCase() === 'hourly') {
+                      const start = dayjs(`${serviceDate} ${timeIn}`)
+                      const end = dayjs(`${serviceDate} ${timeOut}`)
+                      const durationMinutes = end.diff(start, 'minutes')
+                      const durationHours = durationMinutes / 60
+                      servicePayment = durationHours * servicePayment
+                    }
+                    return servicePayment.toFixed(2)
+                  })()} ({contract.serviceRateType || 'flat'})
+                </p>
+                {contract.isMileageRate && mileage > 0 && (
+                  <p className="text-sm text-green-700">
+                    Mileage: ${(() => {
+                      let mileageCost = contract.mileageRate * mileage
+                      if (contract.maxReimbursement && mileageCost > contract.maxReimbursement) {
+                        mileageCost = contract.maxReimbursement
+                      }
+                      return mileageCost.toFixed(2)
+                    })()} ({mileage} miles × ${contract.mileageRate.toFixed(2)})
+                  </p>
+                )}
+              </div>
             </div>
           )}
 
