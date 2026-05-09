@@ -23,12 +23,16 @@ export const supabase = createClient<Database>(
     auth: {
       autoRefreshToken: true,
       persistSession: true,
-      detectSessionInUrl: true,
-      storage: window.localStorage,
-      storageKey: 'routecare-auth',
-      flowType: 'implicit'
+      detectSessionInUrl: true
     }
   }
 )
 
 console.log('✅ Supabase client created')
+
+// Test connection
+supabase.from('employees').select('count').limit(1).then(result => {
+  console.log('🧪 Supabase connection test:', result.error ? 'FAILED' : 'SUCCESS', result)
+}).catch(err => {
+  console.error('🧪 Supabase connection test ERROR:', err)
+})

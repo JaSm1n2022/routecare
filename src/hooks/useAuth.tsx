@@ -39,24 +39,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchProfile = async (userId: string) => {
     try {
       console.log('📋 Fetching profile for user:', userId)
-      const profilePromise = supabase
+      console.log('⏱️ Profile fetch starting at:', new Date().toISOString())
+
+      const startTime = Date.now()
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single()
 
-      const { data, error } = await withTimeout(
-        profilePromise,
-        5000,
-        'Profile fetch timeout after 5 seconds'
-      )
+      const elapsed = Date.now() - startTime
+      console.log(`⏱️ Profile query completed in ${elapsed}ms`)
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Profile fetch error:', error)
+        console.error('❌ Error details:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        })
+        setProfile(null)
+        return null
+      }
       console.log('✅ Profile fetched:', data)
       setProfile(data)
       return data
     } catch (error) {
       console.error('❌ Error fetching profile:', error)
+      setProfile(null)
       return null
     }
   }
@@ -65,67 +76,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchEmployee = async (email: string) => {
     try {
       console.log('👔 Fetching employee for email:', email)
+      console.log('⏱️ Employee fetch starting at:', new Date().toISOString())
 
-      // First, let's see ALL employees to debug
-      const { data: allEmployees, error: debugError } = await supabase
-        .from('employees')
-        .select('*')
-        .limit(5)
-
-      console.log('🔍 Debug - All employees (first 5):', allEmployees)
-      console.log('🔍 Debug - Error:', debugError)
-
-      // Now try to fetch this specific employee WITHOUT status filter
-      const { data: employeesByEmail, error: emailError } = await supabase
+      // Try to fetch employee by email (without status filter first for better compatibility)
+      const startTime = Date.now()
+      const { data, error } = await supabase
         .from('employees')
         .select('*')
         .eq('email', email)
+        .maybeSingle()
 
-      console.log('🔍 Debug - Employees with this email:', employeesByEmail)
-      console.log('🔍 Debug - Email query error:', emailError)
-
-      // Now the actual query
-      const employeePromise = supabase
-        .from('employees')
-        .select('*')
-        .eq('email', email)
-        .eq('status', 'Active')
-        .single()
-
-      const { data, error } = await withTimeout(
-        employeePromise,
-        5000,
-        'Employee fetch timeout after 5 seconds'
-      )
+      const elapsed = Date.now() - startTime
+      console.log(`⏱️ Employee query completed in ${elapsed}ms`)
 
       if (error) {
-        if (error.code === 'PGRST116') {
-          // No employee record found
-          console.log('ℹ️ No employee record found with status=Active')
-          console.log('🔍 Try checking if status field has different value')
-
-          // Try without status filter as fallback
-          const { data: employeeNoStatus, error: noStatusError } = await supabase
-            .from('employees')
-            .select('*')
-            .eq('email', email)
-            .maybeSingle()
-
-          if (employeeNoStatus) {
-            console.log('✅ Found employee WITHOUT status filter:', employeeNoStatus)
-            setEmployee(employeeNoStatus)
-            return employeeNoStatus
-          }
-
-          return null
-        }
-        throw error
+        console.error('❌ Employee fetch error:', error)
+        console.error('❌ Error details:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        })
+        setEmployee(null)
+        return null
       }
+
+      if (!data) {
+        console.log('ℹ️ No employee record found for email:', email)
+        setEmployee(null)
+        return null
+      }
+
       console.log('✅ Employee fetched:', data)
       setEmployee(data)
       return data
     } catch (error) {
       console.error('❌ Error fetching employee:', error)
+      setEmployee(null)
       return null
     }
   }
@@ -172,11 +159,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (session?.user) {
         console.log('👤 User session established:', session.user.email)
 
-        // Fetch profile and employee data (with timeout protection)
+        // Fetch profile and employee data IN PARALLEL (with timeout protection)
+        // Don't let one failure block the other
         try {
-          const profileData = await fetchProfile(session.user.id)
-          if (profileData?.role === 'clinician' && session.user.email) {
-            await fetchEmployee(session.user.email)
+          if (session.user.email) {
+            // Fetch both at the same time
+            await Promise.allSettled([
+              fetchProfile(session.user.id),
+              fetchEmployee(session.user.email)
+            ])
+          } else {
+            await fetchProfile(session.user.id)
           }
         } catch (err) {
           console.error('❌ Error fetching profile/employee:', err)
@@ -209,111 +202,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     authListenerSet = true
     console.log('✅ Auth listener set up')
 
-    // Get initial session
-    const initAuth = async () => {
-      try {
-        // If we have auth tokens in URL, manually set the session
-        if (hasAuthTokens) {
-          console.log('🔗 Auth tokens in URL - manually setting session...')
+    // Skip getSession - just rely on onAuthStateChange
+    // This is more reliable and avoids the hanging issue
+    console.log('✅ Auth initialized - waiting for state changes...')
 
-          const access_token = hashParams.get('access_token')
-          const refresh_token = hashParams.get('refresh_token')
-
-          if (access_token && refresh_token) {
-            try {
-              console.log('🔧 Calling setSession with tokens...')
-              const { data, error } = await supabase.auth.setSession({
-                access_token,
-                refresh_token
-              })
-
-              if (error) {
-                console.error('❌ Error setting session:', error)
-                throw error
-              }
-
-              if (data.session) {
-                console.log('✅ Session set manually:', data.session.user.email)
-                console.log('⏳ Waiting for onAuthStateChange to process session...')
-
-                // Set safety timeout in case listener doesn't complete
-                safetyTimeout = setTimeout(() => {
-                  console.warn('⚠️ onAuthStateChange timeout - forcing completion')
-                  setLoading(false)
-                  setInitialized(true)
-                }, 10000) // 10 seconds for profile/employee fetch
-              }
-            } catch (err) {
-              console.error('❌ Failed to process tokens:', err)
-              setLoading(false)
-              setInitialized(true)
-            }
-          } else {
-            console.warn('⚠️ Tokens in URL but missing access_token or refresh_token')
-            setLoading(false)
-            setInitialized(true)
-          }
-
-          return
-        }
-
-        // No auth tokens - proceed with normal getSession
-        console.log('📞 Calling getSession (no tokens in URL)...')
-
-        safetyTimeout = setTimeout(() => {
-          console.warn('⚠️ getSession timeout')
-          setLoading(false)
-          setInitialized(true)
-        }, 5000)
-
-        const startTime = Date.now()
-        const { data: { session }, error } = await supabase.auth.getSession()
-
-        const elapsed = Date.now() - startTime
-        console.log(`📦 getSession completed in ${elapsed}ms`, {
-          session: !!session,
-          error: error?.message,
-          user: session?.user?.email
-        })
-
-        clearTimeout(safetyTimeout)
-
-        if (error) {
-          console.error('❌ Error getting session:', error)
-          setLoading(false)
-          setInitialized(true)
-        } else if (session) {
-          console.log('✅ Session found:', session.user.email)
-          setSession(session)
-          setUser(session?.user ?? null)
-
-          // Fetch profile and employee data
-          try {
-            const profileData = await fetchProfile(session.user.id)
-            console.log('📋 Profile data:', profileData)
-            if (profileData?.role === 'clinician' && session.user.email) {
-              await fetchEmployee(session.user.email)
-            }
-          } catch (err) {
-            console.error('Profile fetch error:', err)
-          }
-
-          setLoading(false)
-          setInitialized(true)
-        } else {
-          console.log('✅ No session found')
-          setLoading(false)
-          setInitialized(true)
-        }
-      } catch (error) {
-        if (safetyTimeout) clearTimeout(safetyTimeout)
-        console.error('❌ Error initializing auth:', error)
+    // Set a safety timeout to stop loading if no auth event comes
+    safetyTimeout = setTimeout(() => {
+      console.warn('⚠️ No auth state change after 3 seconds')
+      if (!session) {
         setLoading(false)
         setInitialized(true)
       }
-    }
-
-    initAuth()
+    }, 3000)
 
     return () => {
       console.log('🧹 Cleaning up auth subscription')

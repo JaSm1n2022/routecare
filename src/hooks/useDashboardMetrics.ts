@@ -14,7 +14,7 @@ interface DashboardMetrics {
 }
 
 export function useDashboardMetrics(): DashboardMetrics {
-  const { authUser, employee, profile } = useAuth()
+  const { authUser, employee, profile, loading: authLoading } = useAuth()
   const [metrics, setMetrics] = useState<DashboardMetrics>({
     assignedPatients: 0,
     scheduledVisits: 0,
@@ -26,8 +26,29 @@ export function useDashboardMetrics(): DashboardMetrics {
   })
 
   useEffect(() => {
-    console.log('🔍 Debug - Profile:', profile)
-    console.log('🔍 Debug - Employee:', employee)
+    console.log('🔍 Dashboard Metrics Hook - State:', {
+      authLoading,
+      hasAuthUser: !!authUser,
+      hasProfile: !!profile,
+      hasEmployee: !!employee,
+      employeeId: employee?.id,
+      companyId: profile?.company_id || employee?.company_id,
+      profileRole: profile?.role
+    })
+
+    // Wait for auth to finish loading before checking data
+    if (authLoading) {
+      console.log('⏳ Waiting for auth to finish loading...')
+      setMetrics(prev => ({ ...prev, loading: true }))
+      return
+    }
+
+    // If no authUser, user is not logged in
+    if (!authUser) {
+      console.log('❌ No authenticated user')
+      setMetrics(prev => ({ ...prev, loading: false }))
+      return
+    }
 
     // Try both field name variations
     const companyId = profile?.company_id || profile?.companyId || employee?.companyId
@@ -35,19 +56,31 @@ export function useDashboardMetrics(): DashboardMetrics {
 
     console.log('🔍 Debug - Resolved IDs:', { companyId, employeeId })
 
-    if (!companyId || !employeeId) {
-      console.log('⚠️ Missing company_id or employee id', {
-        profile_company_id: profile?.company_id,
-        profile_companyId: profile?.companyId,
-        employee_companyId: employee?.companyId,
-        employee_id: employee?.id
-      })
-      setMetrics(prev => ({ ...prev, loading: false }))
+    // If we don't have employee data yet, wait for it
+    // (Even if profile fetch failed, we can work with employee data alone)
+    if (!employee || !employeeId) {
+      console.log('⏳ Waiting for employee data to load...')
+      setMetrics(prev => ({ ...prev, loading: true }))
       return
     }
 
+    // If we don't have company ID from anywhere, we can't proceed
+    if (!companyId) {
+      console.log('⚠️ Missing company_id', {
+        profile_company_id: profile?.company_id,
+        profile_companyId: profile?.companyId,
+        employee_company_id: employee?.company_id,
+        employee_id: employee?.id,
+        authLoading,
+        profileRole: profile?.role
+      })
+      setMetrics(prev => ({ ...prev, loading: false, error: 'Missing company information' }))
+      return
+    }
+
+    console.log('✅ All data ready, fetching dashboard metrics...')
     fetchDashboardMetrics()
-  }, [profile, employee])
+  }, [profile, employee, authLoading, authUser])
 
   async function fetchDashboardMetrics() {
     try {
