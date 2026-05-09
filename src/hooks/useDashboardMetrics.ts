@@ -26,13 +26,29 @@ export function useDashboardMetrics(): DashboardMetrics {
   })
 
   useEffect(() => {
+    // Safety timeout - if loading takes more than 5 seconds, something is wrong
+    const safetyTimeout = setTimeout(() => {
+      if (metrics.loading) {
+        console.warn('⚠️ Dashboard metrics loading timeout - forcing stop')
+        setMetrics(prev => ({
+          ...prev,
+          loading: false,
+          error: 'Loading timeout - please refresh the page'
+        }))
+      }
+    }, 5000)
+
+    return () => clearTimeout(safetyTimeout)
+  }, [metrics.loading])
+
+  useEffect(() => {
     console.log('🔍 Dashboard Metrics Hook - State:', {
       authLoading,
       hasAuthUser: !!authUser,
       hasProfile: !!profile,
       hasEmployee: !!employee,
       employeeId: employee?.id,
-      companyId: profile?.company_id || employee?.company_id,
+      companyId: profile?.company_id || employee?.companyId,
       profileRole: profile?.role
     })
 
@@ -69,7 +85,7 @@ export function useDashboardMetrics(): DashboardMetrics {
       console.log('⚠️ Missing company_id', {
         profile_company_id: profile?.company_id,
         profile_companyId: profile?.companyId,
-        employee_company_id: employee?.company_id,
+        employee_companyId: employee?.companyId,
         employee_id: employee?.id,
         authLoading,
         profileRole: profile?.role

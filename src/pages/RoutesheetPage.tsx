@@ -121,7 +121,7 @@ export function RoutesheetPage() {
     signature: ''
   })
 
-  // Filter services based on employee position
+  // Filter services based on employee position and set default
   useEffect(() => {
     if (!employee?.position) return
 
@@ -133,6 +133,17 @@ export function RoutesheetPage() {
     })
 
     setAvailableServices(filtered)
+
+    // Set default service to "Regular Visit" if available and no service is currently selected
+    if (!service) {
+      const regularVisit = filtered.find(s => s.name === 'Regular Visit')
+      if (regularVisit) {
+        setService('Regular Visit')
+        setIsClientRequired(regularVisit.isClientRequired)
+        console.log('✅ Default service set to Regular Visit')
+      }
+    }
+
     console.log('📋 Available services for', employee.position, ':', filtered)
   }, [employee?.position])
 
@@ -547,7 +558,17 @@ export function RoutesheetPage() {
                 <input
                   type="time"
                   value={timeIn}
-                  onChange={(e) => setTimeIn(e.target.value)}
+                  onChange={(e) => {
+                    const newTimeIn = e.target.value
+                    setTimeIn(newTimeIn)
+                    // Auto-calculate Time Out as 45 minutes after Time In
+                    if (newTimeIn) {
+                      const [hours, minutes] = newTimeIn.split(':')
+                      const timeInMoment = dayjs().hour(parseInt(hours)).minute(parseInt(minutes))
+                      const timeOutMoment = timeInMoment.add(45, 'minute')
+                      setTimeOut(timeOutMoment.format('HH:mm'))
+                    }
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>

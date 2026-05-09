@@ -23,7 +23,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [employee, setEmployee] = useState<Employee | null>(null)
   const [loading, setLoading] = useState(true)
-  const [initialized, setInitialized] = useState(false)
 
   // Helper to add timeout to promises
   const withTimeout = <T,>(promise: Promise<T>, timeoutMs: number, errorMsg: string): Promise<T> => {
@@ -42,11 +41,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('⏱️ Profile fetch starting at:', new Date().toISOString())
 
       const startTime = Date.now()
-      const { data, error } = await supabase
+
+      // Add timeout to the query
+      const profilePromise = supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single()
+
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Profile query timeout')), 8000)
+      )
+
+      const { data, error } = await Promise.race([profilePromise, timeoutPromise]) as any
 
       const elapsed = Date.now() - startTime
       console.log(`⏱️ Profile query completed in ${elapsed}ms`)
@@ -65,8 +72,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('✅ Profile fetched:', data)
       setProfile(data)
       return data
-    } catch (error) {
-      console.error('❌ Error fetching profile:', error)
+    } catch (error: any) {
+      console.error('❌ Error fetching profile:', error.message)
       setProfile(null)
       return null
     }
@@ -78,13 +85,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('👔 Fetching employee for email:', email)
       console.log('⏱️ Employee fetch starting at:', new Date().toISOString())
 
-      // Try to fetch employee by email (without status filter first for better compatibility)
       const startTime = Date.now()
-      const { data, error } = await supabase
+
+      // Add timeout to the query
+      const employeePromise = supabase
         .from('employees')
         .select('*')
         .eq('email', email)
         .maybeSingle()
+
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Employee query timeout')), 8000)
+      )
+
+      const { data, error } = await Promise.race([employeePromise, timeoutPromise]) as any
 
       const elapsed = Date.now() - startTime
       console.log(`⏱️ Employee query completed in ${elapsed}ms`)
@@ -110,8 +124,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('✅ Employee fetched:', data)
       setEmployee(data)
       return data
-    } catch (error) {
-      console.error('❌ Error fetching employee:', error)
+    } catch (error: any) {
+      console.error('❌ Error fetching employee:', error.message)
       setEmployee(null)
       return null
     }
@@ -119,37 +133,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Initialize auth state
   useEffect(() => {
-    if (initialized) return
-
     console.log('🔐 Initializing auth...')
     console.log('📍 Current URL:', window.location.href)
-    console.log('🔑 Storage check:', localStorage.getItem('routecare-auth') ? 'Has stored auth' : 'No stored auth')
 
-    // Check if this is a magic link callback (has auth tokens in URL)
+    let safetyTimeout: NodeJS.Timeout
+    let isMounted = true
+
+    // Check if this is a magic link callback
     const hashParams = new URLSearchParams(window.location.hash.substring(1))
     const hasAuthTokens = hashParams.has('access_token') || hashParams.has('refresh_token')
 
     if (hasAuthTokens) {
-      console.log('🔗 Magic link detected in URL - processing...')
-      console.log('🎫 Tokens in hash:', {
-        access_token: hashParams.get('access_token')?.substring(0, 20) + '...',
-        refresh_token: hashParams.has('refresh_token'),
-        type: hashParams.get('type')
-      })
+      console.log('🔗 Magic link detected - will be processed by onAuthStateChange')
     }
 
-    let safetyTimeout: NodeJS.Timeout
-    let authListenerSet = false
-
-    // Listen for auth changes FIRST (before getSession)
+    // Listen for auth changes
     console.log('👂 Setting up auth listener...')
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!isMounted) return
+
       console.log('🔄 Auth state changed:', event, {
         session: !!session,
-        user: session?.user?.email,
-        listenerSet: authListenerSet
+        user: session?.user?.email
       })
 
       // Update state
@@ -159,15 +166,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (session?.user) {
         console.log('👤 User session established:', session.user.email)
 
-        // Fetch profile and employee data IN PARALLEL (with timeout protection)
-        // Don't let one failure block the other
+        // Fetch profile and employee data IN PARALLEL
         try {
           if (session.user.email) {
-            // Fetch both at the same time
-            await Promise.allSettled([
+            const results = await Promise.allSettled([
               fetchProfile(session.user.id),
               fetchEmployee(session.user.email)
             ])
+            console.log('📊 Fetch results:', {
+              profile: results[0].status,
+              employee: results[1].status
+            })
           } else {
             await fetchProfile(session.user.id)
           }
@@ -179,18 +188,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log('✅ Auth and data fetch complete')
         if (safetyTimeout) clearTimeout(safetyTimeout)
         setLoading(false)
-        setInitialized(true)
       } else {
         console.log('👋 No session - user logged out')
         setProfile(null)
         setEmployee(null)
         if (safetyTimeout) clearTimeout(safetyTimeout)
         setLoading(false)
-        setInitialized(true)
       }
 
       if (event === 'SIGNED_IN') {
-        console.log('✅ User signed in successfully via', event)
+        console.log('✅ User signed in successfully')
         // Clean up URL hash after successful sign in
         if (window.location.hash) {
           console.log('🧹 Cleaning up URL hash')
@@ -199,27 +206,72 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     })
 
-    authListenerSet = true
     console.log('✅ Auth listener set up')
 
-    // Skip getSession - just rely on onAuthStateChange
-    // This is more reliable and avoids the hanging issue
-    console.log('✅ Auth initialized - waiting for state changes...')
+    // If this is a magic link, wait for onAuthStateChange to handle it
+    // Otherwise, check for existing session
+    if (!hasAuthTokens) {
+      console.log('🔍 Checking for existing session...')
+      supabase.auth.getSession().then(async ({ data: { session: initialSession }, error }) => {
+        if (!isMounted) return
 
-    // Set a safety timeout to stop loading if no auth event comes
-    safetyTimeout = setTimeout(() => {
-      console.warn('⚠️ No auth state change after 3 seconds')
-      if (!session) {
+        if (error) {
+          console.error('❌ Error getting session:', error)
+          setLoading(false)
+          return
+        }
+
+        console.log('📦 Initial session check:', !!initialSession, initialSession?.user?.email)
+
+        if (initialSession?.user) {
+          console.log('✅ Found existing session, loading data...')
+          setSession(initialSession)
+          setUser(initialSession.user)
+
+          // Fetch profile and employee data
+          try {
+            console.log('🔄 Fetching profile and employee for:', initialSession.user.email)
+            const results = await Promise.allSettled([
+              fetchProfile(initialSession.user.id),
+              fetchEmployee(initialSession.user.email || '')
+            ])
+
+            console.log('📊 Initial fetch results:', {
+              profile: results[0].status,
+              employee: results[1].status
+            })
+          } catch (err) {
+            console.error('❌ Error in initial fetch:', err)
+          }
+
+          console.log('✅ Initial data fetch complete')
+          if (safetyTimeout) clearTimeout(safetyTimeout)
+          setLoading(false)
+        } else {
+          console.log('ℹ️ No initial session found')
+          setLoading(false)
+        }
+      }).catch(err => {
+        console.error('❌ Error getting initial session:', err)
         setLoading(false)
-        setInitialized(true)
-      }
-    }, 3000)
+      })
+    } else {
+      console.log('⏳ Waiting for magic link to be processed...')
+    }
+
+    // Set a safety timeout
+    safetyTimeout = setTimeout(() => {
+      console.warn('⚠️ Auth timeout after 10 seconds')
+      setLoading(false)
+    }, 10000)
 
     return () => {
       console.log('🧹 Cleaning up auth subscription')
+      isMounted = false
+      if (safetyTimeout) clearTimeout(safetyTimeout)
       subscription.unsubscribe()
     }
-  }, [initialized])
+  }, []) // Empty dependency array - run once on mount
 
   // Sign in with magic link
   const signInWithEmail = async (email: string) => {
