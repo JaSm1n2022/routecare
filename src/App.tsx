@@ -6,6 +6,7 @@ import { DashboardPage } from './pages/DashboardPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { RoutesheetPage } from './pages/RoutesheetPage'
 import { EarningsPage } from './pages/EarningsPage'
+import { PickupPage } from './pages/PickupPage'
 import { UnauthorizedPage } from './pages/UnauthorizedPage'
 import { AuthCallbackPage } from './pages/AuthCallbackPage'
 import { Loader2 } from 'lucide-react'
@@ -136,6 +137,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <RoutesheetPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/pickup"
+        element={
+          <ProtectedRoute>
+            <PickupPage />
           </ProtectedRoute>
         }
       />
