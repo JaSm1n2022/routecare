@@ -125,9 +125,17 @@ export function DashboardPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center gap-4">
               <HamburgerMenu />
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-                {t('dashboard.title')}
-              </h1>
+              <div className="flex flex-col items-center flex-1">
+                <img
+                  src="/images/myroutecare.png"
+                  alt="MyRouteCare Logo"
+                  className="h-20 w-auto mb-2"
+                  style={{ mixBlendMode: 'multiply' }}
+                />
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 text-center">
+                  {t('dashboard.title')}
+                </h1>
+              </div>
             </div>
           </div>
         </div>
@@ -152,29 +160,27 @@ export function DashboardPage() {
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <HamburgerMenu />
-              <div className="flex flex-col items-center">
-                <img
-                  src="/images/myroutecare.png"
-                  alt="MyRouteCare Logo"
-                  className="h-12 w-auto mb-2"
-                  style={{ mixBlendMode: 'multiply' }}
-                />
-                <div className="text-center">
-                  <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-                    {employee?.name || authUser?.email?.split('@')[0]}
-                  </h1>
-                  <p className="text-sm text-gray-600 mt-1">
-                    {employee?.position || 'Clinician'} • {new Date().toLocaleDateString('en-US', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
-                  </p>
-                </div>
+          <div className="flex items-center gap-4">
+            <HamburgerMenu />
+            <div className="flex flex-col items-center flex-1">
+              <img
+                src="/images/myroutecare.png"
+                alt="MyRouteCare Logo"
+                className="h-20 w-auto mb-2"
+                style={{ mixBlendMode: 'multiply' }}
+              />
+              <div className="text-center">
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+                  {employee?.name || authUser?.email?.split('@')[0]}
+                </h1>
+                <p className="text-sm text-gray-600 mt-1">
+                  {employee?.position || 'Clinician'} • {new Date().toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </p>
               </div>
             </div>
           </div>

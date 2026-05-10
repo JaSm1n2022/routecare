@@ -265,7 +265,7 @@ export function DeliveryPage() {
               <img
                 src="/images/myroutecare.png"
                 alt="MyRouteCare Logo"
-                className="h-12 w-auto mb-2"
+                className="h-20 w-auto mb-2"
                 style={{ mixBlendMode: 'multiply' }}
               />
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900 text-center">
