@@ -12,7 +12,7 @@ import {
   MapPin,
   Package,
   TrendingUp,
-  Receipt,
+  FileText,
   Loader2,
   AlertCircle
 } from 'lucide-react'
@@ -64,19 +64,27 @@ export function DashboardPage() {
   const quickActions = [
     {
       title: t('quickActions.routesheet'),
-      description: t('quickActions.routesheetDesc'),
+      description: 'Record your visit',
       icon: MapPin,
       href: '/routesheet',
       color: 'bg-blue-50 text-blue-600',
       iconBg: 'bg-blue-100'
     },
     {
+      title: 'Services & Earnings',
+      description: 'View your completed services and earnings',
+      icon: DollarSign,
+      href: '/earnings',
+      color: 'bg-green-50 text-green-600',
+      iconBg: 'bg-green-100'
+    },
+    {
       title: t('quickActions.pickup'),
       description: t('quickActions.pickupDesc'),
       icon: Package,
       href: '/pickup',
-      color: 'bg-green-50 text-green-600',
-      iconBg: 'bg-green-100'
+      color: 'bg-purple-50 text-purple-600',
+      iconBg: 'bg-purple-100'
     },
     {
       title: t('quickActions.delivery'),
@@ -87,10 +95,10 @@ export function DashboardPage() {
       iconBg: 'bg-purple-100'
     },
     {
-      title: t('quickActions.serviceEarnings'),
-      description: t('quickActions.earningsDesc'),
-      icon: Receipt,
-      href: '/earnings',
+      title: 'Documents',
+      description: 'View and manage your documents',
+      icon: FileText,
+      href: '/documents',
       color: 'bg-orange-50 text-orange-600',
       iconBg: 'bg-orange-100'
     }

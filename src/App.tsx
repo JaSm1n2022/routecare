@@ -5,6 +5,7 @@ import { LoginPage } from './pages/LoginPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { RoutesheetPage } from './pages/RoutesheetPage'
+import { EarningsPage } from './pages/EarningsPage'
 import { UnauthorizedPage } from './pages/UnauthorizedPage'
 import { AuthCallbackPage } from './pages/AuthCallbackPage'
 import { Loader2 } from 'lucide-react'
@@ -119,6 +120,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/earnings"
+        element={
+          <ProtectedRoute>
+            <EarningsPage />
           </ProtectedRoute>
         }
       />
