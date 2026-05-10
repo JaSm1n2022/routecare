@@ -6,7 +6,7 @@ import { User, Mail, Briefcase, Building, Phone } from 'lucide-react'
 
 export function ProfilePage() {
   const { t } = useTranslation()
-  const { authUser, employee } = useAuth()
+  const { authUser, employee, profile } = useAuth()
   const navigate = useNavigate()
 
   return (
@@ -92,12 +92,12 @@ export function ProfilePage() {
                   </div>
                 )}
 
-                {employee?.company_name && (
+                {(profile as any)?.company_name && (
                   <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
                     <Building className="w-5 h-5 text-gray-600" />
                     <div className="flex-1">
                       <p className="text-sm text-gray-600">Company</p>
-                      <p className="font-medium text-gray-900">{employee.company_name}</p>
+                      <p className="font-medium text-gray-900">{(profile as any)?.company_name}</p>
                     </div>
                   </div>
                 )}
