@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Camera, X, FlipHorizontal, Check, Trash2, Package } from 'lucide-react'
+import { Camera, X, FlipHorizontal, Check, Trash2, Package } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { MobileSelect } from '../components/MobileSelect'
+import { HamburgerMenu } from '../components/HamburgerMenu'
 import ReactSignatureCanvas from 'react-signature-canvas'
 import Webcam from 'react-webcam'
 import toast from 'react-hot-toast'
@@ -254,27 +255,31 @@ export function PickupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-6">
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="font-medium">Back to Dashboard</span>
-          </button>
-
-          <div className="flex items-center gap-3 mb-2">
-            <Package className="w-8 h-8 text-purple-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Pickup Tracking</h1>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center gap-4">
+            <HamburgerMenu />
+            <div className="flex flex-col items-center flex-1">
+              <img
+                src="/images/myroutecare.png"
+                alt="MyRouteCare Logo"
+                className="h-12 w-auto mb-2"
+                style={{ mixBlendMode: 'multiply' }}
+              />
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 text-center">
+                Pickup Tracking
+              </h1>
+            </div>
           </div>
-          <p className="text-gray-600">Record supply pickups and signatures</p>
         </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
         {/* Main Card */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-6">
           {/* Client Selection */}
           <div className="mb-6">
             <MobileSelect
