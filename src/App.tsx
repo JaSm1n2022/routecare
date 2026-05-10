@@ -7,6 +7,7 @@ import { ProfilePage } from './pages/ProfilePage'
 import { RoutesheetPage } from './pages/RoutesheetPage'
 import { EarningsPage } from './pages/EarningsPage'
 import { PickupPage } from './pages/PickupPage'
+import { DeliveryPage } from './pages/DeliveryPage'
 import { UnauthorizedPage } from './pages/UnauthorizedPage'
 import { AuthCallbackPage } from './pages/AuthCallbackPage'
 import { Loader2 } from 'lucide-react'
@@ -145,6 +146,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <PickupPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/delivery"
+        element={
+          <ProtectedRoute>
+            <DeliveryPage />
           </ProtectedRoute>
         }
       />
