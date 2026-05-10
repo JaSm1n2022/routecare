@@ -2,10 +2,10 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
-import { Layout } from '../components/Layout'
+import { HamburgerMenu } from '../components/HamburgerMenu'
 import { MobileSelect } from '../components/MobileSelect'
 import toast from 'react-hot-toast'
-import { ArrowLeft, Save, X, Edit3, Type } from 'lucide-react'
+import { Save, X, Edit3, Type } from 'lucide-react'
 import dayjs from 'dayjs'
 import SignatureCanvas from 'react-signature-canvas'
 
@@ -474,32 +474,40 @@ export function RoutesheetPage() {
 
   if (loading) {
     return (
-      <Layout>
+      <div className="min-h-screen bg-gray-50">
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading...</p>
           </div>
         </div>
-      </Layout>
+      </div>
     )
   }
 
   return (
-    <Layout>
-      <div className="max-w-4xl mx-auto p-4">
-        {/* Header */}
-        <div className="mb-6">
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
-          >
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            Back to Dashboard
-          </button>
-          <h1 className="text-2xl font-bold text-gray-900">Route Sheet</h1>
-          <p className="text-gray-600">Record your visit</p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center gap-4">
+            <HamburgerMenu />
+            <div className="flex flex-col items-center flex-1">
+              <img
+                src="/images/myroutecare.png"
+                alt="MyRouteCare Logo"
+                className="h-12 w-auto mb-2"
+                style={{ mixBlendMode: 'multiply' }}
+              />
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 text-center">
+                Route Sheet
+              </h1>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Service Selection - FIRST */}
@@ -905,6 +913,6 @@ export function RoutesheetPage() {
           </div>
         </div>
       )}
-    </Layout>
+    </div>
   )
 }

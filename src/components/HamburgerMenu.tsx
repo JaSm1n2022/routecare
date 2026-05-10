@@ -12,7 +12,8 @@ import {
   MapPin,
   Package,
   TrendingUp,
-  DollarSign
+  DollarSign,
+  FileText
 } from 'lucide-react'
 
 export function HamburgerMenu() {
@@ -184,6 +185,13 @@ export function HamburgerMenu() {
                 >
                   <DollarSign className="w-5 h-5" />
                   <span className="font-medium">Services & Earnings</span>
+                </button>
+                <button
+                  onClick={() => handleNavigate('/documents')}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-all"
+                >
+                  <FileText className="w-5 h-5" />
+                  <span className="font-medium">{t('quickActions.documents')}</span>
                 </button>
               </div>
             </div>
