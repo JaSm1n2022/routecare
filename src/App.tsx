@@ -80,6 +80,11 @@ function AppRoutes() {
   const location = useLocation()
   const { loading } = useAuth()
 
+  // Scroll to top on route change
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location.pathname])
+
   useEffect(() => {
     // Check if this is a magic link callback (has tokens in URL)
     const hashParams = new URLSearchParams(window.location.hash.substring(1))
