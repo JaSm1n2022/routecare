@@ -96,7 +96,9 @@ export function LoginPage() {
 
               <div className="mt-6 text-center text-sm text-gray-600">
                 <p>
-                  By continuing, you agree to our Terms of Service and Privacy Policy
+                  <strong className="font-bold">Internal Use Only</strong>
+                  <br />
+                  For authorized staff only. Use this app for work-related check-ins and keep your login secure.
                 </p>
               </div>
             </>

@@ -64,15 +64,17 @@ export function ProfilePage() {
                   </div>
                 )}
 
-                <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                {/* Hidden for now - Email */}
+                {/* <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
                   <Mail className="w-5 h-5 text-gray-600" />
                   <div className="flex-1">
                     <p className="text-sm text-gray-600">Email</p>
                     <p className="font-medium text-gray-900">{authUser?.email}</p>
                   </div>
-                </div>
+                </div> */}
 
-                {employee?.position && (
+                {/* Hidden for now - Position */}
+                {/* {employee?.position && (
                   <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
                     <Briefcase className="w-5 h-5 text-gray-600" />
                     <div className="flex-1">
@@ -80,9 +82,10 @@ export function ProfilePage() {
                       <p className="font-medium text-gray-900">{employee.position}</p>
                     </div>
                   </div>
-                )}
+                )} */}
 
-                {employee?.phone && (
+                {/* Hidden for now - Phone */}
+                {/* {employee?.phone && (
                   <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
                     <Phone className="w-5 h-5 text-gray-600" />
                     <div className="flex-1">
@@ -90,9 +93,10 @@ export function ProfilePage() {
                       <p className="font-medium text-gray-900">{employee.phone}</p>
                     </div>
                   </div>
-                )}
+                )} */}
 
-                {(profile as any)?.company_name && (
+                {/* Hidden for now - Company */}
+                {/* {(profile as any)?.company_name && (
                   <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
                     <Building className="w-5 h-5 text-gray-600" />
                     <div className="flex-1">
@@ -100,7 +104,7 @@ export function ProfilePage() {
                       <p className="font-medium text-gray-900">{(profile as any)?.company_name}</p>
                     </div>
                   </div>
-                )}
+                )} */}
 
                 <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
                   <div className="w-5 h-5 flex items-center justify-center">
