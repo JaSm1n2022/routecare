@@ -11,13 +11,13 @@
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome",
-    "assignedPatients": "Assigned Patients",
+    "assignedPatients": "Assigned Clients",
     "scheduledVisits": "Scheduled Visits",
     "completedVisits": "Completed Visits",
     "estimatedPayment": "Estimated Visit Payment",
     "actualEarnings": "This Week's Earnings",
     "thisWeek": "This Week",
-    "noActivePatients": "No Active Patients"
+    "noActivePatients": "No Active Clients"
   },
   "quickActions": {
     "routesheet": "Route Sheet",

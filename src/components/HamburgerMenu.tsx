@@ -93,7 +93,8 @@ export function HamburgerMenu() {
                   <p className="font-semibold text-gray-900 truncate">
                     {employee?.name || authUser?.email?.split('@')[0]}
                   </p>
-                  <p className="text-sm text-gray-600 truncate">{authUser?.email}</p>
+                  {/* Hidden for now - Email */}
+                  {/* <p className="text-sm text-gray-600 truncate">{authUser?.email}</p> */}
                 </div>
               </div>
             </div>

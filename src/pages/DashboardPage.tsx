@@ -174,7 +174,7 @@ export function DashboardPage() {
                   {employee?.name || authUser?.email?.split('@')[0]}
                 </h1>
                 <p className="text-sm text-gray-600 mt-1">
-                  {employee?.position || 'Clinician'} • {new Date().toLocaleDateString('en-US', {
+                  {new Date().toLocaleDateString('en-US', {
                     weekday: 'long',
                     year: 'numeric',
                     month: 'long',
@@ -224,11 +224,11 @@ export function DashboardPage() {
           </div>
         </div>
 
-        {/* Patient Assignments */}
+        {/* Client Assignments */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">My Patient Assignments</h2>
-            <span className="text-sm text-gray-500">{metrics.assignments.length} {metrics.assignments.length === 1 ? 'patient' : 'patients'}</span>
+            <h2 className="text-lg font-semibold text-gray-900">My Client Assignments</h2>
+            <span className="text-sm text-gray-500">{metrics.assignments.length} {metrics.assignments.length === 1 ? 'client' : 'clients'}</span>
           </div>
           <div className="space-y-3">
             {metrics.assignments.length > 0 ? (
@@ -263,7 +263,7 @@ export function DashboardPage() {
               ))
             ) : (
               <div className="text-center py-8">
-                <p className="text-gray-500">No patient assignments found</p>
+                <p className="text-gray-500">No client assignments found</p>
               </div>
             )}
           </div>

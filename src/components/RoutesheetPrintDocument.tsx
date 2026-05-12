@@ -269,7 +269,7 @@ export function RoutesheetPrintDocument({
           {/* Table Header */}
           <View style={styles.tableHeaderRow} fixed>
             <View style={[styles.tableCol, styles.tableColPatient, { justifyContent: 'center', alignItems: 'center' }]}>
-              <Text style={styles.headerText}>Patient</Text>
+              <Text style={styles.headerText}>Client</Text>
             </View>
             <View style={[styles.tableCol, styles.tableColDate, { justifyContent: 'center', alignItems: 'center' }]}>
               <Text style={styles.headerText}>Date</Text>

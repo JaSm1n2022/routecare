@@ -11,13 +11,13 @@
   "dashboard": {
     "title": "Panel de Control",
     "welcome": "Bienvenido",
-    "assignedPatients": "Pacientes Asignados",
+    "assignedPatients": "Clientes Asignados",
     "scheduledVisits": "Visitas Programadas",
     "completedVisits": "Visitas Completadas",
     "estimatedPayment": "Pago Estimado de Visitas",
     "actualEarnings": "Ganancias de Esta Semana",
     "thisWeek": "Esta Semana",
-    "noActivePatients": "Sin Pacientes Activos"
+    "noActivePatients": "Sin Clientes Activos"
   },
   "quickActions": {
     "routesheet": "Hoja de Ruta",

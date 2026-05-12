@@ -36,7 +36,7 @@ export function LoginPage() {
               className="h-32 w-auto"
               style={{ mixBlendMode: 'multiply' }}
             />
-            <p className="text-gray-600 text-sm font-bold -mt-4">Clinician Portal</p>
+            <p className="text-gray-600 text-sm font-bold -mt-4">Portal</p>
           </div>
         </div>
 
