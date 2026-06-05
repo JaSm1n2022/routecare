@@ -239,23 +239,73 @@ export function useDashboardMetrics(): DashboardMetrics {
 
       // Calculate estimated payment
       let estimatedPayment = 0
-      assignments.forEach(assignment => {
-        // Find matching contract for this patient
+      console.log('💰 Starting payment calculation with:', {
+        employeeId,
+        totalContracts: contracts.length,
+        totalAssignments: assignments.length
+      })
+
+      assignments.forEach((assignment, index) => {
+        console.log(`\n📋 Assignment ${index + 1}:`, {
+          patientCd: assignment.patientCd,
+          visitType: assignment.visitType,
+          frequencyVisit: assignment.frequencyVisit
+        })
+
+        // Default service type is "Regular Visit" for assignments
+        const serviceType = 'regular visit'
+
+        // Step 1: Find patient-specific contract for Regular Visit + employee
         let contract = contracts.find(
           c => c.patientCd === assignment.patientCd?.toString() &&
-               c.serviceType?.toLowerCase() === 'regular visit'
+               c.serviceType?.toLowerCase() === serviceType &&
+               c.employeeId === employeeId
         )
+        if (contract) console.log('✅ Found patient+employee contract:', contract)
 
-        // If no patient-specific contract, use default "regular visit" rate
+        // Step 2: Find patient-specific contract for Regular Visit (any employee)
         if (!contract) {
-          contract = contracts.find(c => c.serviceType?.toLowerCase() === 'regular visit')
+          contract = contracts.find(
+            c => c.patientCd === assignment.patientCd?.toString() &&
+                 c.serviceType?.toLowerCase() === serviceType
+          )
+          if (contract) console.log('✅ Found patient-specific contract:', contract)
+        }
+
+        // Step 3: Find employee-specific Regular Visit contract (applies to all patients)
+        if (!contract) {
+          contract = contracts.find(
+            c => !c.patientCd &&
+                 c.serviceType?.toLowerCase() === serviceType &&
+                 c.employeeId === employeeId
+          )
+          if (contract) console.log('✅ Found employee-specific Regular Visit contract (for all patients):', contract)
+        }
+
+        // Step 4: Find default Regular Visit contract (applies to all patients and employees)
+        if (!contract) {
+          contract = contracts.find(
+            c => !c.patientCd &&
+                 !c.employeeId &&
+                 c.serviceType?.toLowerCase() === serviceType
+          )
+          if (contract) console.log('✅ Found default Regular Visit contract (for all):', contract)
+        }
+
+        if (!contract) {
+          console.log('❌ No contract found for this assignment')
         }
 
         if (contract) {
           const visits = parseInt(assignment.frequencyVisit || '0')
-          estimatedPayment += contract.serviceRate * visits
+          const lineTotal = contract.serviceRate * visits
+          console.log(`💵 Adding to total: ${visits} visits × $${contract.serviceRate} = $${lineTotal}`)
+          estimatedPayment += lineTotal
         }
       })
+
+      console.log(`\n💰 Total estimated payment: $${estimatedPayment.toFixed(2)}`)
+
 
       // Calculate actual earnings (sum of estimatedPayment from completed routesheets)
       const actualEarnings = routesheets.reduce((total, sheet) => {
