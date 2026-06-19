@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
-import { getThisWeekDateRange, formatDateForSupabase } from '../utils/dateHelpers'
+import { getThisWeekDateRange, getThisMonthDateRange, formatDateForSupabase } from '../utils/dateHelpers'
 
 interface Assignment {
   id: string
@@ -130,12 +130,21 @@ export function useDashboardMetrics(): DashboardMetrics {
         throw new Error('Missing required IDs')
       }
 
-      // Get this week's date range
-      const weekRange = getThisWeekDateRange()
-      const fromDate = formatDateForSupabase(weekRange.from, '00:00')
-      const toDate = formatDateForSupabase(weekRange.to, '23:59')
+      // Get date range based on employee position
+      // MSW and Chaplain use monthly range, others use weekly range
+      const employeePosition = employee?.position?.trim()
+      const isMonthlyUser = employeePosition === 'MSW' || employeePosition === 'Chaplain'
 
-      console.log('📅 Week range:', { from: fromDate, to: toDate })
+      const dateRange = isMonthlyUser ? getThisMonthDateRange() : getThisWeekDateRange()
+      const fromDate = formatDateForSupabase(dateRange.from, '00:00')
+      const toDate = formatDateForSupabase(dateRange.to, '23:59')
+
+      console.log('📅 Date range:', {
+        position: employeePosition,
+        isMonthlyUser,
+        from: fromDate,
+        to: toDate
+      })
 
       console.log('🔍 Running queries with:', {
         table: 'assignments',

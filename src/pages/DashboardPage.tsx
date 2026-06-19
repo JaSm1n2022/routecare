@@ -23,6 +23,11 @@ export function DashboardPage() {
   const { authUser, employee } = useAuth()
   const metrics = useDashboardMetrics()
 
+  // Determine if user should see monthly or weekly data
+  const employeePosition = employee?.position?.trim()
+  const isMonthlyUser = employeePosition === 'MSW' || employeePosition === 'Chaplain'
+  const periodText = isMonthlyUser ? 'This Month' : t('dashboard.thisWeek')
+
   const stats = [
     {
       title: t('dashboard.assignedPatients'),
@@ -36,28 +41,28 @@ export function DashboardPage() {
       value: metrics.scheduledVisits.toString(),
       icon: Calendar,
       color: 'bg-green-500',
-      subtext: t('dashboard.thisWeek')
+      subtext: periodText
     },
     {
       title: t('dashboard.completedVisits'),
       value: metrics.completedVisits.toString(),
       icon: CheckCircle,
       color: 'bg-purple-500',
-      subtext: t('dashboard.thisWeek')
+      subtext: periodText
     },
     {
       title: t('dashboard.estimatedPayment'),
       value: `$${metrics.estimatedPayment.toFixed(2)}`,
       icon: DollarSign,
       color: 'bg-orange-500',
-      subtext: t('dashboard.thisWeek')
+      subtext: periodText
     },
     {
       title: t('dashboard.actualEarnings'),
       value: `$${metrics.actualEarnings.toFixed(2)}`,
       icon: Wallet,
       color: 'bg-teal-500',
-      subtext: t('dashboard.thisWeek')
+      subtext: periodText
     }
   ]
 

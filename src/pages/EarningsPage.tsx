@@ -4,7 +4,7 @@ import { Calendar, DollarSign, Printer } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { HamburgerMenu } from '../components/HamburgerMenu'
-import { getThisWeekDateRange } from '../utils/dateHelpers'
+import { getThisWeekDateRange, getThisMonthDateRange } from '../utils/dateHelpers'
 import dayjs from 'dayjs'
 import { pdf } from '@react-pdf/renderer'
 import { RoutesheetPrintDocument } from '../components/RoutesheetPrintDocument'
@@ -32,10 +32,13 @@ export function EarningsPage() {
   const [printLoading, setPrintLoading] = useState(false)
   const [totalEarnings, setTotalEarnings] = useState(0)
 
-  // Date range state - default to this week
-  const thisWeek = getThisWeekDateRange()
-  const [dateStart, setDateStart] = useState(dayjs(thisWeek.from).format('YYYY-MM-DD'))
-  const [dateEnd, setDateEnd] = useState(dayjs(thisWeek.to).format('YYYY-MM-DD'))
+  // Date range state - default to this week or this month based on position
+  const employeePosition = employee?.position?.trim()
+  const isMonthlyUser = employeePosition === 'MSW' || employeePosition === 'Chaplain'
+  const defaultDateRange = isMonthlyUser ? getThisMonthDateRange() : getThisWeekDateRange()
+
+  const [dateStart, setDateStart] = useState(dayjs(defaultDateRange.from).format('YYYY-MM-DD'))
+  const [dateEnd, setDateEnd] = useState(dayjs(defaultDateRange.to).format('YYYY-MM-DD'))
 
   const fetchRoutesheets = async () => {
     if (!employee?.id || !employee?.companyId) return

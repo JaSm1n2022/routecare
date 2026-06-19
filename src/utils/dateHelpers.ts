@@ -40,6 +40,27 @@ function formatDate(date: Date): string {
 }
 
 /**
+ * Get the start and end dates for the current month
+ * @returns {from: string, to: string} - Dates in MM/DD/YYYY format
+ */
+export function getThisMonthDateRange(): { from: string; to: string } {
+  const now = new Date()
+
+  // Get first day of the month
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
+  firstDay.setHours(0, 0, 0, 0)
+
+  // Get last day of the month
+  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+  lastDay.setHours(23, 59, 59, 999)
+
+  return {
+    from: formatDate(firstDay),
+    to: formatDate(lastDay)
+  }
+}
+
+/**
  * Get the start and end dates for today
  */
 export function getTodayDateRange(): { from: string; to: string } {
