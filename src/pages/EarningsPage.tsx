@@ -249,10 +249,10 @@ export function EarningsPage() {
               <div className="p-4 space-y-3">
                 {routesheets.map((sheet) => {
                   // Normalize patient code - remove digits and dots
-                  const normalizedPatientCd = sheet.patientCd?
-                    .replace(/\d/g, '') // Remove all digits
-                    .replace(/\./g, '') // Remove all dots
-                    .trim()
+                  const normalizedPatientCd = sheet.patientCd
+                    ?.replace(/\d/g, '') // Remove all digits
+                    ?.replace(/\./g, '') // Remove all dots
+                    ?.trim()
 
                   return (
                     <div
