@@ -4,6 +4,7 @@ import { Calendar, DollarSign, Printer, Trash2, Edit2, X, Edit3, Type } from 'lu
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { HamburgerMenu } from '../components/HamburgerMenu'
+import { MobileSelect } from '../components/MobileSelect'
 import { getThisWeekDateRange, getThisMonthDateRange, getPayrollCutoffDateRange } from '../utils/dateHelpers'
 import dayjs from 'dayjs'
 import { pdf } from '@react-pdf/renderer'
@@ -36,6 +37,7 @@ const CLIENT_SERVICES = [
   { code: "DPV", name: "Death pronouncement", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
   { code: "SOC", name: "SOC/Assessment", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
   { code: "APV", name: "Admission Visit", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
+  { code: "PAV", name: "Potential Admission Visit", isClientRequired: false, permission: ["Certified Nurse Assistant", "Case Manager", "Registered Nurse", "MSW", "Director of Nurse", "LPN", "Medical Director", "Chaplain"] },
   { code: "REA", name: "Reassessment Visit", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
   { code: "ATD", name: "Attendance", isClientRequired: false, permission: ["Administrative Manager", "Case Manager", "Director of Nurse", "Registered Nurse", "Office Manager", "Administrator"] },
   { code: "OTH", name: "Other", isClientRequired: false, permission: ["*"] }
@@ -306,9 +308,30 @@ export function EarningsPage() {
       timeOutType: typeof sheet.timeOut
     })
 
+    // Helper function to check if service is a visit type
+    const isVisitService = (serviceName: string) => {
+      const lowerService = serviceName.toLowerCase()
+      return lowerService.includes('visit') ||
+             lowerService === 'rv' ||
+             lowerService === 'regular visit' ||
+             lowerService === 'swv' ||
+             lowerService === 'social worker visit'
+    }
+
     // Parse comments - check if it matches a predefined option
-    const commentValue = sheet.comments || ''
+    let commentValue = sheet.comments || ''
+
+    // Check if original comment matches a preset option
     const isPresetComment = COMMENT_OPTIONS.some(opt => opt.value === commentValue && opt.value !== '')
+
+    // If no comment, set default based on service type
+    if (!commentValue) {
+      if (sheet.service === 'Potential Admission Visit') {
+        commentValue = 'Other'
+      } else if (isVisitService(sheet.service)) {
+        commentValue = 'Visit Completed – No Issues'
+      }
+    }
 
     // Format timeIn and timeOut - handle both "HH:mm:ss" and "HH:mm" formats
     // Also try to extract from dosStart/dosEnd if timeIn/timeOut are not available
@@ -346,14 +369,18 @@ export function EarningsPage() {
       await fetchPatients()
     }
 
+    // Determine final selectedComment and otherComments
+    // If commentValue is now set (either from DB or defaulted), check if it's a preset
+    const finalIsPreset = COMMENT_OPTIONS.some(opt => opt.value === commentValue && opt.value !== '')
+
     setEditForm({
       serviceDate: dayjs(sheet.dosStart).format('YYYY-MM-DD'),
       timeIn: formattedTimeIn,
       timeOut: formattedTimeOut,
       service: sheet.service || '',
       patientCd: sheet.patientCd || '',
-      selectedComment: isPresetComment ? commentValue : (commentValue ? 'Other' : ''),
-      otherComments: !isPresetComment && commentValue ? commentValue : '',
+      selectedComment: finalIsPreset ? commentValue : (commentValue ? 'Other' : ''),
+      otherComments: !finalIsPreset && commentValue ? commentValue : '',
       estimatedPayment: sheet.estimatedPayment?.toString() || '0'
     })
     // Set existing signature
@@ -373,6 +400,31 @@ export function EarningsPage() {
       // Fetch patients if client is now required
       if (clientRequired) {
         fetchPatients()
+      }
+
+      // Helper function to check if service is a visit type
+      const isVisitService = (serviceName: string) => {
+        const lowerService = serviceName.toLowerCase()
+        return lowerService.includes('visit') ||
+               lowerService === 'rv' ||
+               lowerService === 'regular visit' ||
+               lowerService === 'swv' ||
+               lowerService === 'social worker visit'
+      }
+
+      // Always set default comment based on service type when service changes
+      if (value === 'Potential Admission Visit') {
+        setEditForm(prev => ({
+          ...prev,
+          service: value,
+          selectedComment: 'Other'
+        }))
+      } else if (isVisitService(value)) {
+        setEditForm(prev => ({
+          ...prev,
+          service: value,
+          selectedComment: 'Visit Completed – No Issues'
+        }))
       }
     }
   }
@@ -768,21 +820,15 @@ export function EarningsPage() {
 
                 {/* Service Type - Dropdown FIRST */}
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Service Type <span className="text-red-500">*</span>
-                  </label>
-                  <select
+                  <MobileSelect
+                    label="Service Type"
+                    required
                     value={editForm.service}
-                    onChange={(e) => handleEditFormChange('service', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">-- Select Service Type --</option>
-                    {CLIENT_SERVICES.map((service) => (
-                      <option key={service.code} value={service.name}>
-                        {service.name}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(value) => handleEditFormChange('service', value)}
+                    options={CLIENT_SERVICES.map(s => ({ value: s.name, label: s.name }))}
+                    placeholder="-- Select Service Type --"
+                    searchable
+                  />
                 </div>
 
                 {/* Select Client - Conditional SECOND (only if service requires it) */}
@@ -888,7 +934,7 @@ export function EarningsPage() {
                         onChange={(e) => handleEditFormChange('otherComments', e.target.value)}
                         rows={4}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                        placeholder="Enter your comments..."
+                        placeholder="Enter Name or Initial"
                       />
                     </div>
                   )}

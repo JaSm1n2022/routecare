@@ -33,6 +33,7 @@ const CLIENT_SERVICES = [
   { code: "DPV", name: "Death pronouncement", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
   { code: "SOC", name: "SOC/Assessment", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
   { code: "APV", name: "Admission Visit", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
+  { code: "PAV", name: "Potential Admission Visit", isClientRequired: false, permission: ["Certified Nurse Assistant", "Case Manager", "Registered Nurse", "MSW", "Director of Nurse", "LPN", "Medical Director", "Chaplain"] },
   { code: "REA", name: "Reassessment Visit", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
   { code: "ATD", name: "Attendance", isClientRequired: false, permission: ["Administrative Manager", "Case Manager", "Director of Nurse", "Registered Nurse", "Office Manager", "Administrator"] },
   { code: "OTH", name: "Other", isClientRequired: false, permission: ["*"] }
@@ -140,7 +141,11 @@ export function RoutesheetPage() {
       if (regularVisit) {
         setService('Regular Visit')
         setIsClientRequired(regularVisit.isClientRequired)
-        console.log('✅ Default service set to Regular Visit')
+        // Set default comment for visit service
+        if (!comments) {
+          setComments('Visit Completed – No Issues')
+        }
+        console.log('✅ Default service set to Regular Visit with default comment')
       }
     }
 
@@ -226,6 +231,25 @@ export function RoutesheetPage() {
     if (serviceName === 'Attendance') {
       setTimeIn('08:00')
       setTimeOut('17:00')
+    }
+
+    // Helper function to check if service is a visit type
+    const isVisitService = (name: string) => {
+      const lowerService = name.toLowerCase()
+      return lowerService.includes('visit') ||
+             lowerService === 'rv' ||
+             lowerService === 'regular visit' ||
+             lowerService === 'swv' ||
+             lowerService === 'social worker visit'
+    }
+
+    // Always set default comment based on service type when service changes
+    if (serviceName === 'Potential Admission Visit') {
+      setComments('Other')
+      console.log('✅ Default comment set to Other for Potential Admission Visit')
+    } else if (isVisitService(serviceName)) {
+      setComments('Visit Completed – No Issues')
+      console.log('✅ Default comment set to Visit Completed for visit service')
     }
 
     console.log('📝 Service changed:', serviceName, 'Client required:', selectedService?.isClientRequired)
@@ -521,6 +545,7 @@ export function RoutesheetPage() {
                 onChange={handleServiceChange}
                 options={availableServices.map(s => ({ value: s.name, label: s.name }))}
                 placeholder="-- Select Service Type --"
+                searchable
               />
 
               {/* Client Selection - Only if service requires it */}
@@ -655,7 +680,7 @@ export function RoutesheetPage() {
                     onChange={(e) => setOtherComments(e.target.value)}
                     rows={4}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Please specify..."
+                    placeholder="Enter Name or Initial"
                   />
                 </div>
               )}
