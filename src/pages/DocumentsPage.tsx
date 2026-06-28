@@ -16,8 +16,15 @@ const documents: Document[] = [
     name: 'Employee Handbook',
     description: 'Company policies, procedures, and guidelines',
     url: 'https://acwocotrngkeaxtzdzfz.supabase.co/storage/v1/object/public/documents/HTH%20Employee%20Handbook_V3.pdf',
-    icon: FileText
-  }
+    icon: FileText,
+  },
+  {
+    id: '2',
+    name: 'About MyRouteCare',
+    description: 'About MyRouteCare Clinician Portal',
+    url: 'https://acwocotrngkeaxtzdzfz.supabase.co/storage/v1/object/public/documents/MyRouteCare.pdf',
+    icon: FileText,
+  },
 ]
 
 export function DocumentsPage() {
@@ -51,7 +58,6 @@ export function DocumentsPage() {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-
         {/* Documents List */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
           <div className="divide-y divide-gray-200">
@@ -71,7 +77,9 @@ export function DocumentsPage() {
                         <h3 className="text-lg font-semibold text-gray-900 mb-1">
                           {doc.name}
                         </h3>
-                        <p className="text-sm text-gray-600">{doc.description}</p>
+                        <p className="text-sm text-gray-600">
+                          {doc.description}
+                        </p>
                       </div>
                     </div>
                     <button
@@ -92,7 +100,9 @@ export function DocumentsPage() {
         {documents.length === 0 && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-12 text-center">
             <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600 text-lg font-medium">No documents available</p>
+            <p className="text-gray-600 text-lg font-medium">
+              No documents available
+            </p>
             <p className="text-gray-500 text-sm mt-2">
               Check back later for company documents and resources
             </p>
