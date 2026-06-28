@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useDashboardMetrics } from '../hooks/useDashboardMetrics'
 import { HamburgerMenu } from '../components/HamburgerMenu'
+import { getPayrollPeriodDisplay } from '../utils/dateHelpers'
 import {
   Users,
   Calendar,
@@ -23,10 +24,14 @@ export function DashboardPage() {
   const { authUser, employee } = useAuth()
   const metrics = useDashboardMetrics()
 
-  // Determine if user should see monthly or weekly data
+  // Determine if user should see monthly or payroll cutoff data
   const employeePosition = employee?.position?.trim()
   const isMonthlyUser = employeePosition === 'MSW' || employeePosition === 'Chaplain'
-  const periodText = isMonthlyUser ? 'This Month' : t('dashboard.thisWeek')
+
+  // For MSW/Chaplain: show "This Month"
+  // For all others: show payroll period dates
+  const periodText = isMonthlyUser ? 'This Month' : getPayrollPeriodDisplay()
+  const periodSubtext = isMonthlyUser ? null : 'Based on Payroll Cutoff'
 
   const stats = [
     {
@@ -34,35 +39,40 @@ export function DashboardPage() {
       value: metrics.assignedPatients.toString(),
       icon: Users,
       color: 'bg-blue-500',
-      subtext: metrics.assignedPatients === 0 ? t('dashboard.noActivePatients') : 'As of Today'
+      subtext: metrics.assignedPatients === 0 ? t('dashboard.noActivePatients') : 'As of Today',
+      showPayrollSubtext: false
     },
     {
       title: t('dashboard.scheduledVisits'),
       value: metrics.scheduledVisits.toString(),
       icon: Calendar,
       color: 'bg-green-500',
-      subtext: periodText
+      subtext: periodText,
+      showPayrollSubtext: !isMonthlyUser
     },
     {
       title: t('dashboard.completedVisits'),
       value: metrics.completedVisits.toString(),
       icon: CheckCircle,
       color: 'bg-purple-500',
-      subtext: periodText
+      subtext: periodText,
+      showPayrollSubtext: !isMonthlyUser
     },
     {
       title: t('dashboard.estimatedPayment'),
       value: `$${metrics.estimatedPayment.toFixed(2)}`,
       icon: DollarSign,
       color: 'bg-orange-500',
-      subtext: periodText
+      subtext: periodText,
+      showPayrollSubtext: !isMonthlyUser
     },
     {
       title: t('dashboard.actualEarnings'),
       value: `$${metrics.actualEarnings.toFixed(2)}`,
       icon: Wallet,
       color: 'bg-teal-500',
-      subtext: periodText
+      subtext: periodText,
+      showPayrollSubtext: !isMonthlyUser
     }
   ]
 
@@ -204,7 +214,12 @@ export function DashboardPage() {
               </div>
               <h3 className="text-gray-600 text-sm font-medium mb-1 line-clamp-1">{stat.title}</h3>
               <p className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</p>
-              <p className="text-xs text-gray-500">{stat.subtext}</p>
+              <div className="text-xs text-gray-500">
+                <p>{stat.subtext}</p>
+                {stat.showPayrollSubtext && periodSubtext && (
+                  <p className="text-[10px] text-gray-400 mt-1">{periodSubtext}</p>
+                )}
+              </div>
             </div>
           ))}
         </div>

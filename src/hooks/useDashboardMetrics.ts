@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
-import { getThisWeekDateRange, getThisMonthDateRange, formatDateForSupabase } from '../utils/dateHelpers'
+import { getThisWeekDateRange, getThisMonthDateRange, getPayrollCutoffDateRange, formatDateForSupabase } from '../utils/dateHelpers'
 
 interface Assignment {
   id: string
@@ -131,17 +131,19 @@ export function useDashboardMetrics(): DashboardMetrics {
       }
 
       // Get date range based on employee position
-      // MSW and Chaplain use monthly range, others use weekly range
+      // MSW and Chaplain use monthly range
+      // All other users use payroll cutoff period (11-25, 26-10)
       const employeePosition = employee?.position?.trim()
       const isMonthlyUser = employeePosition === 'MSW' || employeePosition === 'Chaplain'
 
-      const dateRange = isMonthlyUser ? getThisMonthDateRange() : getThisWeekDateRange()
+      const dateRange = isMonthlyUser ? getThisMonthDateRange() : getPayrollCutoffDateRange()
       const fromDate = formatDateForSupabase(dateRange.from, '00:00')
       const toDate = formatDateForSupabase(dateRange.to, '23:59')
 
       console.log('📅 Date range:', {
         position: employeePosition,
         isMonthlyUser,
+        rangeType: isMonthlyUser ? 'Monthly' : 'Payroll Cutoff',
         from: fromDate,
         to: toDate
       })

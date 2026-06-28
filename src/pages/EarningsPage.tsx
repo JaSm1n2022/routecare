@@ -4,7 +4,7 @@ import { Calendar, DollarSign, Printer, Trash2, Edit2, X, Edit3, Type } from 'lu
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { HamburgerMenu } from '../components/HamburgerMenu'
-import { getThisWeekDateRange, getThisMonthDateRange } from '../utils/dateHelpers'
+import { getThisWeekDateRange, getThisMonthDateRange, getPayrollCutoffDateRange } from '../utils/dateHelpers'
 import dayjs from 'dayjs'
 import { pdf } from '@react-pdf/renderer'
 import { RoutesheetPrintDocument } from '../components/RoutesheetPrintDocument'
@@ -86,10 +86,12 @@ export function EarningsPage() {
   const [printLoading, setPrintLoading] = useState(false)
   const [totalEarnings, setTotalEarnings] = useState(0)
 
-  // Date range state - default to this week or this month based on position
+  // Date range state - default based on position
+  // MSW and Chaplain: This Month
+  // All others: Payroll Cutoff Period (11-25, 26-10)
   const employeePosition = employee?.position?.trim()
   const isMonthlyUser = employeePosition === 'MSW' || employeePosition === 'Chaplain'
-  const defaultDateRange = isMonthlyUser ? getThisMonthDateRange() : getThisWeekDateRange()
+  const defaultDateRange = isMonthlyUser ? getThisMonthDateRange() : getPayrollCutoffDateRange()
 
   const [dateStart, setDateStart] = useState(dayjs(defaultDateRange.from).format('YYYY-MM-DD'))
   const [dateEnd, setDateEnd] = useState(dayjs(defaultDateRange.to).format('YYYY-MM-DD'))

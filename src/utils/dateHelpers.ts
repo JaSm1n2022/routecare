@@ -61,6 +61,62 @@ export function getThisMonthDateRange(): { from: string; to: string } {
 }
 
 /**
+ * Get the start and end dates for the current payroll period
+ * Payroll periods: 11th-25th and 26th-10th
+ * @returns {from: string, to: string} - Dates in MM/DD/YYYY format
+ */
+export function getPayrollCutoffDateRange(): { from: string; to: string } {
+  const now = new Date()
+  const currentDay = now.getDate()
+
+  let startDate: Date
+  let endDate: Date
+
+  if (currentDay >= 26) {
+    // We're in the 26th-10th period
+    // Start: 26th of current month
+    startDate = new Date(now.getFullYear(), now.getMonth(), 26)
+    startDate.setHours(0, 0, 0, 0)
+
+    // End: 10th of next month
+    endDate = new Date(now.getFullYear(), now.getMonth() + 1, 10)
+    endDate.setHours(23, 59, 59, 999)
+  } else if (currentDay >= 11) {
+    // We're in the 11th-25th period
+    // Start: 11th of current month
+    startDate = new Date(now.getFullYear(), now.getMonth(), 11)
+    startDate.setHours(0, 0, 0, 0)
+
+    // End: 25th of current month
+    endDate = new Date(now.getFullYear(), now.getMonth(), 25)
+    endDate.setHours(23, 59, 59, 999)
+  } else {
+    // We're in the 1st-10th period (end of previous payroll period)
+    // Start: 26th of previous month
+    startDate = new Date(now.getFullYear(), now.getMonth() - 1, 26)
+    startDate.setHours(0, 0, 0, 0)
+
+    // End: 10th of current month
+    endDate = new Date(now.getFullYear(), now.getMonth(), 10)
+    endDate.setHours(23, 59, 59, 999)
+  }
+
+  return {
+    from: formatDate(startDate),
+    to: formatDate(endDate)
+  }
+}
+
+/**
+ * Get the formatted payroll period display string
+ * @returns string - e.g., "06/26/2026 to 07/10/2026"
+ */
+export function getPayrollPeriodDisplay(): string {
+  const { from, to } = getPayrollCutoffDateRange()
+  return `${from} to ${to}`
+}
+
+/**
  * Get the start and end dates for today
  */
 export function getTodayDateRange(): { from: string; to: string } {
