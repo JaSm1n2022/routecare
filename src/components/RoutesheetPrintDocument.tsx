@@ -307,10 +307,12 @@ export function RoutesheetPrintDocument({
 
             // Trim patient code - remove digits and dots
             const trimmedPatient = sheet.patientCd
-              .replace(/\d/g, '')
-              .replace(/\./g, '')
-              .trim()
-              .substring(0, 20)
+              ? sheet.patientCd
+                  .replace(/\d/g, '')
+                  .replace(/\./g, '')
+                  .trim()
+                  .substring(0, 20)
+              : ''
 
             return (
               <View key={sheet.id} style={styles.tableRow} wrap={false}>
