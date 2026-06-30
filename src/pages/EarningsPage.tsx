@@ -12,58 +12,59 @@ import { RoutesheetPrintDocument } from '../components/RoutesheetPrintDocument'
 import { getImageBase64 } from '../utils/helper'
 import toast from 'react-hot-toast'
 import SignatureCanvas from 'react-signature-canvas'
+import { useTranslation } from 'react-i18next'
 
-const CLIENT_SERVICES = [
-  { code: "IV", name: "Initial Visit", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "MSW", "Director of Nurse", "LPN", "Medical Director", "Chaplain"] },
+const getClientServices = (t: any) => [
+  { code: "IV", name: t('services.initialVisit'), isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "MSW", "Director of Nurse", "LPN", "Medical Director", "Chaplain"] },
   { code: "PRN", name: "PRN", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse", "LPN", "Medical Director"] },
-  { code: "DC", name: "Discharge", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
-  { code: "SUP", name: "Supervisory Visit", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
+  { code: "DC", name: t('services.discharge'), isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
+  { code: "SUP", name: t('services.supervisoryVisit'), isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
   { code: "HUV", name: "HUV", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
   { code: "SFV", name: "SFV", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse", "LPN"] },
-  { code: "IDT-PR", name: "IDT Meeting In Person", isClientRequired: false, permission: ["*"] },
-  { code: "IDT-NT", name: "IDT Meeting Thru Notes", isClientRequired: false, permission: ["*"] },
-  { code: "IDT-PH", name: "IDT Meeting Via Phone", isClientRequired: false, permission: ["*"] },
-  { code: "OC", name: "On-Call", isClientRequired: false, permission: ["*"] },
-  { code: "RC", name: "Recertification Visit", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
-  { code: "SM", name: "Staff Meeting", isClientRequired: false, permission: ["*"] },
-  { code: "IN", name: "In-Service", isClientRequired: false, permission: ["*"] },
-  { code: "EV", name: "Evaluation Visit", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse", "Nurse Practioner"] },
-  { code: "SWV", name: "Social Worker Visit", isClientRequired: true, permission: ["MSW"] },
-  { code: "RV", name: "Regular Visit", isClientRequired: true, permission: ["Certified Nurse Assistant", "Case Manager", "Registered Nurse", "MSW", "Director of Nurse", "LPN", "Medical Director", "Chaplain"] },
-  { code: "BV", name: "Bereavement Visit", isClientRequired: true, permission: ["Chaplain", "Bereavement"] },
-  { code: "F/UV", name: "Follow Up Visit", isClientRequired: true, permission: ["Case Manager", "MSW", "Director of Nurse", "Registered Nurse", "LPN", "Medical Director", "Chaplain"] },
-  { code: "O", name: "Orientation", isClientRequired: false, permission: ["*"] },
-  { code: "VV", name: "Volunteer Visit", isClientRequired: true, permission: ["Volunteer"] },
-  { code: "DPV", name: "Death pronouncement", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
-  { code: "SOC", name: "SOC/Assessment", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
-  { code: "APV", name: "Admission Visit", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
-  { code: "PAV", name: "Potential Admission Visit", isClientRequired: false, permission: ["Certified Nurse Assistant", "Case Manager", "Registered Nurse", "MSW", "Director of Nurse", "LPN", "Medical Director", "Chaplain"] },
-  { code: "REA", name: "Reassessment Visit", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
-  { code: "ATD", name: "Attendance", isClientRequired: false, permission: ["Administrative Manager", "Case Manager", "Director of Nurse", "Registered Nurse", "Office Manager", "Administrator"] },
-  { code: "OTH", name: "Other", isClientRequired: false, permission: ["*"] }
+  { code: "IDT-PR", name: t('services.idtMeetingInPerson'), isClientRequired: false, permission: ["*"] },
+  { code: "IDT-NT", name: t('services.idtMeetingThruNotes'), isClientRequired: false, permission: ["*"] },
+  { code: "IDT-PH", name: t('services.idtMeetingViaPhone'), isClientRequired: false, permission: ["*"] },
+  { code: "OC", name: t('services.onCall'), isClientRequired: false, permission: ["*"] },
+  { code: "RC", name: t('services.recertificationVisit'), isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
+  { code: "SM", name: t('services.staffMeeting'), isClientRequired: false, permission: ["*"] },
+  { code: "IN", name: t('services.inService'), isClientRequired: false, permission: ["*"] },
+  { code: "EV", name: t('services.evaluationVisit'), isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse", "Nurse Practioner"] },
+  { code: "SWV", name: t('services.socialWorkerVisit'), isClientRequired: true, permission: ["MSW"] },
+  { code: "RV", name: t('services.regularVisit'), isClientRequired: true, permission: ["Certified Nurse Assistant", "Case Manager", "Registered Nurse", "MSW", "Director of Nurse", "LPN", "Medical Director", "Chaplain"] },
+  { code: "BV", name: t('services.bereavementVisit'), isClientRequired: true, permission: ["Chaplain", "Bereavement"] },
+  { code: "F/UV", name: t('services.followUpVisit'), isClientRequired: true, permission: ["Case Manager", "MSW", "Director of Nurse", "Registered Nurse", "LPN", "Medical Director", "Chaplain"] },
+  { code: "O", name: t('services.orientation'), isClientRequired: false, permission: ["*"] },
+  { code: "VV", name: t('services.volunteerVisit'), isClientRequired: true, permission: ["Volunteer"] },
+  { code: "DPV", name: t('services.deathPronouncement'), isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
+  { code: "SOC", name: t('services.socAssessment'), isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
+  { code: "APV", name: t('services.admissionVisit'), isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
+  { code: "PAV", name: t('services.potentialAdmissionVisit'), isClientRequired: false, permission: ["Certified Nurse Assistant", "Case Manager", "Registered Nurse", "MSW", "Director of Nurse", "LPN", "Medical Director", "Chaplain"] },
+  { code: "REA", name: t('services.reassessmentVisit'), isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
+  { code: "ATD", name: t('services.attendance'), isClientRequired: false, permission: ["Administrative Manager", "Case Manager", "Director of Nurse", "Registered Nurse", "Office Manager", "Administrator"] },
+  { code: "OTH", name: t('services.other'), isClientRequired: false, permission: ["*"] }
 ]
 
-const COMMENT_OPTIONS = [
-  { value: '', label: '-- Select a Comment --' },
-  { value: 'Refused Visit', label: 'Refused Visit' },
-  { value: 'No One Answering', label: 'No One Answering' },
-  { value: 'Client Hospitalized', label: 'Client Hospitalized' },
-  { value: 'Client Unavailable / Not Home', label: 'Client Unavailable / Not Home' },
-  { value: 'Visit Rescheduled', label: 'Visit Rescheduled' },
-  { value: 'Client Deceased', label: 'Client Deceased' },
-  { value: 'Client on Vacation / Out of Town', label: 'Client on Vacation / Out of Town' },
-  { value: 'Caregiver Cancelled', label: 'Caregiver Cancelled' },
-  { value: 'Weather / Road Conditions', label: 'Weather / Road Conditions' },
-  { value: 'Wrong Address / Unable to Locate Client', label: 'Wrong Address / Unable to Locate Client' },
-  { value: 'Client Transferred to Facility', label: 'Client Transferred to Facility' },
-  { value: 'Visit Completed – No Issues', label: 'Visit Completed – No Issues' },
+const getCommentOptions = (t: any) => [
+  { value: '', label: t('comments.selectComment') },
+  { value: 'Refused Visit', label: t('comments.refusedVisit') },
+  { value: 'No One Answering', label: t('comments.noOneAnswering') },
+  { value: 'Client Hospitalized', label: t('comments.clientHospitalized') },
+  { value: 'Client Unavailable / Not Home', label: t('comments.clientUnavailable') },
+  { value: 'Visit Rescheduled', label: t('comments.visitRescheduled') },
+  { value: 'Client Deceased', label: t('comments.clientDeceased') },
+  { value: 'Client on Vacation / Out of Town', label: t('comments.clientOnVacation') },
+  { value: 'Caregiver Cancelled', label: t('comments.caregiverCancelled') },
+  { value: 'Weather / Road Conditions', label: t('comments.weatherConditions') },
+  { value: 'Wrong Address / Unable to Locate Client', label: t('comments.wrongAddress') },
+  { value: 'Client Transferred to Facility', label: t('comments.clientTransferred') },
+  { value: 'Visit Completed – No Issues', label: t('comments.visitCompleted') },
   { value: 'HUV1', label: 'HUV1' },
   { value: 'HUV2', label: 'HUV2' },
-  { value: 'Hope Admission', label: 'Hope Admission' },
+  { value: 'Hope Admission', label: t('comments.hopeAdmission') },
   { value: 'SFV1', label: 'SFV1' },
   { value: 'SFV2', label: 'SFV2' },
-  { value: 'SFV Admission', label: 'SFV Admission' },
-  { value: 'Other', label: 'Other' }
+  { value: 'SFV Admission', label: t('comments.sfvAdmission') },
+  { value: 'Other', label: t('comments.other') }
 ]
 
 interface Routesheet {
@@ -81,6 +82,7 @@ interface Routesheet {
 }
 
 export function EarningsPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { employee } = useAuth()
   const [routesheets, setRoutesheets] = useState<Routesheet[]>([])
@@ -181,13 +183,13 @@ export function EarningsPage() {
 
   const handlePrint = async () => {
     if (!routesheets || routesheets.length === 0) {
-      toast.error('No data available to print')
+      toast.error(t('earnings.noDataToPrint'))
       return
     }
 
     try {
       setPrintLoading(true)
-      toast.loading('Generating PDF...', { id: 'pdf-generation' })
+      toast.loading(t('earnings.generatingPdf'), { id: 'pdf-generation' })
 
       // Load logo from Supabase
       const logoUrl = 'https://acwocotrngkeaxtzdzfz.supabase.co/storage/v1/object/public/images/headerdoc.png'
@@ -223,10 +225,10 @@ export function EarningsPage() {
       link.download = filename
       link.click()
 
-      toast.success('PDF generated successfully!', { id: 'pdf-generation' })
+      toast.success(t('earnings.pdfGeneratedSuccess'), { id: 'pdf-generation' })
     } catch (error) {
       console.error('Error generating PDF:', error)
-      toast.error('Failed to generate PDF. Please try again.', { id: 'pdf-generation' })
+      toast.error(t('earnings.pdfGenerationError'), { id: 'pdf-generation' })
     } finally {
       setPrintLoading(false)
     }
@@ -243,7 +245,7 @@ export function EarningsPage() {
 
     try {
       console.log('🗑️ Deleting routesheet:', deleteTarget.id)
-      toast.loading('Deleting service entry...', { id: 'delete-service' })
+      toast.loading(t('earnings.deletingService'), { id: 'delete-service' })
 
       const { error } = await supabase
         .from('routesheets')
@@ -261,10 +263,10 @@ export function EarningsPage() {
       // Refresh the list after deletion
       await fetchRoutesheets()
 
-      toast.success('Service entry deleted successfully!', { id: 'delete-service' })
+      toast.success(t('earnings.deleteSuccess'), { id: 'delete-service' })
     } catch (error) {
       console.error('❌ Error deleting routesheet:', error)
-      toast.error('Failed to delete service entry. Please try again.', { id: 'delete-service' })
+      toast.error(t('earnings.deleteError'), { id: 'delete-service' })
       setShowDeleteModal(false)
       setDeleteTarget(null)
     }
@@ -313,20 +315,21 @@ export function EarningsPage() {
       const lowerService = serviceName.toLowerCase()
       return lowerService.includes('visit') ||
              lowerService === 'rv' ||
-             lowerService === 'regular visit' ||
+             lowerService === t('services.regularVisit').toLowerCase() ||
              lowerService === 'swv' ||
-             lowerService === 'social worker visit'
+             lowerService === t('services.socialWorkerVisit').toLowerCase()
     }
 
     // Parse comments - check if it matches a predefined option
     let commentValue = sheet.comments || ''
 
     // Check if original comment matches a preset option
+    const COMMENT_OPTIONS = getCommentOptions(t)
     const isPresetComment = COMMENT_OPTIONS.some(opt => opt.value === commentValue && opt.value !== '')
 
     // If no comment, set default based on service type
     if (!commentValue) {
-      if (sheet.service === 'Potential Admission Visit') {
+      if (sheet.service === t('services.potentialAdmissionVisit')) {
         commentValue = 'Other'
       } else if (isVisitService(sheet.service)) {
         commentValue = 'Visit Completed – No Issues'
@@ -360,6 +363,7 @@ export function EarningsPage() {
     })
 
     // Check if service requires client
+    const CLIENT_SERVICES = getClientServices(t)
     const selectedService = CLIENT_SERVICES.find(s => s.name === sheet.service)
     const clientRequired = selectedService?.isClientRequired || false
     setIsClientRequired(clientRequired)
@@ -393,6 +397,7 @@ export function EarningsPage() {
 
     // If service type changes, check if client is required
     if (field === 'service') {
+      const CLIENT_SERVICES = getClientServices(t)
       const selectedService = CLIENT_SERVICES.find(s => s.name === value)
       const clientRequired = selectedService?.isClientRequired || false
       setIsClientRequired(clientRequired)
@@ -407,13 +412,13 @@ export function EarningsPage() {
         const lowerService = serviceName.toLowerCase()
         return lowerService.includes('visit') ||
                lowerService === 'rv' ||
-               lowerService === 'regular visit' ||
+               lowerService === t('services.regularVisit').toLowerCase() ||
                lowerService === 'swv' ||
-               lowerService === 'social worker visit'
+               lowerService === t('services.socialWorkerVisit').toLowerCase()
       }
 
       // Always set default comment based on service type when service changes
-      if (value === 'Potential Admission Visit') {
+      if (value === t('services.potentialAdmissionVisit')) {
         setEditForm(prev => ({
           ...prev,
           service: value,
@@ -435,9 +440,9 @@ export function EarningsPage() {
         const dataUrl = sigCanvasRef.current.toDataURL()
         setSignature(dataUrl)
         setShowSignatureModal(false)
-        toast.success('Signature captured successfully!')
+        toast.success(t('earnings.signatureCaptured'))
       } else {
-        toast.error('Please draw your signature')
+        toast.error(t('routesheet.pleaseDrawSignature'))
       }
     } else if (signatureMode === 'type') {
       if (typedName.trim()) {
@@ -457,17 +462,17 @@ export function EarningsPage() {
           const dataUrl = canvas.toDataURL()
           setSignature(dataUrl)
           setShowSignatureModal(false)
-          toast.success('Signature created successfully!')
+          toast.success(t('earnings.signatureCreated'))
         }
       } else {
-        toast.error('Please type your name')
+        toast.error(t('routesheet.pleaseTypeName'))
       }
     }
   }
 
   const handleClearSignature = () => {
     setSignature(null)
-    toast.info('Signature cleared')
+    toast.info(t('earnings.signatureCleared'))
   }
 
   const confirmEdit = async () => {
@@ -478,37 +483,37 @@ export function EarningsPage() {
 
     // Validate service type
     if (!editForm.service) {
-      toast.error('Please select a service type', { id: 'edit-service' })
+      toast.error(t('routesheet.pleaseSelectService'), { id: 'edit-service' })
       return
     }
 
     // Validate client if required by service type
     if (isClientRequired && !editForm.patientCd) {
-      toast.error('Please select a client for this service type', { id: 'edit-service' })
+      toast.error(t('earnings.pleaseSelectClient'), { id: 'edit-service' })
       return
     }
 
     // Validate signature
     if (!signature) {
-      toast.error('Signature is required', { id: 'edit-service' })
+      toast.error(t('routesheet.signatureRequired'), { id: 'edit-service' })
       return
     }
 
     // Validate "Other" comments
     if (editForm.selectedComment === 'Other' && !editForm.otherComments.trim()) {
-      toast.error('Please specify other comment', { id: 'edit-service' })
+      toast.error(t('routesheet.pleaseSpecifyComment'), { id: 'edit-service' })
       return
     }
 
     // Validate service date
     if (!editForm.serviceDate) {
-      toast.error('Please select a service date', { id: 'edit-service' })
+      toast.error(t('earnings.pleaseSelectDate'), { id: 'edit-service' })
       return
     }
 
     try {
       console.log('✏️ Updating routesheet:', editTarget.id)
-      toast.loading('Updating service entry...', { id: 'edit-service' })
+      toast.loading(t('earnings.updatingService'), { id: 'edit-service' })
 
       // Determine the final comment value
       const finalComment = editForm.selectedComment === 'Other'
@@ -551,10 +556,10 @@ export function EarningsPage() {
       // Refresh the list after update
       await fetchRoutesheets()
 
-      toast.success('Service entry updated successfully!', { id: 'edit-service' })
+      toast.success(t('earnings.updateSuccess'), { id: 'edit-service' })
     } catch (error) {
       console.error('❌ Error updating routesheet:', error)
-      toast.error('Failed to update service entry. Please try again.', { id: 'edit-service' })
+      toast.error(t('earnings.updateError'), { id: 'edit-service' })
     }
   }
 
@@ -578,7 +583,7 @@ export function EarningsPage() {
                 style={{ mixBlendMode: 'multiply' }}
               />
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900 text-center">
-                Services & Earnings
+                {t('earnings.title')}
               </h1>
             </div>
           </div>
@@ -592,7 +597,7 @@ export function EarningsPage() {
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
             <div className="w-full sm:w-auto sm:flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Date Start
+                {t('earnings.dateStart')}
               </label>
               <input
                 type="date"
@@ -604,7 +609,7 @@ export function EarningsPage() {
 
             <div className="w-full sm:w-auto sm:flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Date End
+                {t('earnings.dateEnd')}
               </label>
               <input
                 type="date"
@@ -619,7 +624,7 @@ export function EarningsPage() {
               disabled={loading}
               className="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
             >
-              Apply
+              {t('earnings.apply')}
             </button>
           </div>
         </div>
@@ -628,7 +633,7 @@ export function EarningsPage() {
         <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-md p-6 mb-6 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-green-100 text-sm font-medium">Total Earnings</p>
+              <p className="text-green-100 text-sm font-medium">{t('earnings.totalEarnings')}</p>
               <p className="text-4xl font-bold mt-1">${totalEarnings.toFixed(2)}</p>
               <p className="text-green-100 text-sm mt-2">
                 {dayjs(dateStart).format('MMM D, YYYY')} - {dayjs(dateEnd).format('MMM D, YYYY')}
@@ -644,9 +649,9 @@ export function EarningsPage() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">Service Details</h2>
+              <h2 className="text-lg font-semibold text-gray-900">{t('earnings.serviceDetails')}</h2>
               <p className="text-sm text-gray-600 mt-1">
-                {routesheets.length} {routesheets.length === 1 ? 'service' : 'services'} completed
+                {routesheets.length} {routesheets.length === 1 ? t('earnings.serviceOne') : t('earnings.servicesMany')} {t('earnings.completed')}
               </p>
             </div>
             <button
@@ -655,14 +660,14 @@ export function EarningsPage() {
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
             >
               <Printer className="w-5 h-5" />
-              <span className="hidden sm:inline">{printLoading ? 'Generating...' : 'Print'}</span>
+              <span className="hidden sm:inline">{printLoading ? t('earnings.generating') : t('earnings.print')}</span>
             </button>
           </div>
 
           {loading ? (
             <div className="p-12 text-center">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <p className="text-gray-600 mt-4">Loading services...</p>
+              <p className="text-gray-600 mt-4">{t('earnings.loadingServices')}</p>
             </div>
           ) : routesheets.length > 0 ? (
             <div className="max-h-[600px] overflow-y-auto">
@@ -696,14 +701,14 @@ export function EarningsPage() {
                             <button
                               onClick={() => handleEditClick(sheet)}
                               className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                              title="Edit service entry"
+                              title={t('earnings.editServiceEntry')}
                             >
                               <Edit2 className="w-5 h-5" />
                             </button>
                             <button
                               onClick={() => handleDeleteClick(sheet.id, normalizedPatientCd || sheet.patientCd)}
                               className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                              title="Delete service entry"
+                              title={t('earnings.deleteServiceEntry')}
                             >
                               <Trash2 className="w-5 h-5" />
                             </button>
@@ -728,9 +733,9 @@ export function EarningsPage() {
           ) : (
             <div className="p-12 text-center">
               <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 text-lg font-medium">No services found</p>
+              <p className="text-gray-600 text-lg font-medium">{t('earnings.noServicesFound')}</p>
               <p className="text-gray-500 text-sm mt-2">
-                Try adjusting your date range to see more results
+                {t('earnings.adjustDateRange')}
               </p>
             </div>
           )}
@@ -748,8 +753,8 @@ export function EarningsPage() {
                   <Trash2 className="w-6 h-6 text-red-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900">Delete Service Entry</h3>
-                  <p className="text-sm text-gray-500 mt-1">This action cannot be undone</p>
+                  <h3 className="text-xl font-semibold text-gray-900">{t('earnings.deleteModalTitle')}</h3>
+                  <p className="text-sm text-gray-500 mt-1">{t('earnings.deleteModalSubtitle')}</p>
                 </div>
               </div>
             </div>
@@ -757,12 +762,12 @@ export function EarningsPage() {
             {/* Modal Body */}
             <div className="p-6">
               <p className="text-gray-700 leading-relaxed">
-                Are you sure you want to delete the service entry for{' '}
+                {t('earnings.deleteConfirmation')}{' '}
                 <span className="font-semibold text-gray-900">{deleteTarget?.patientCd}</span>?
               </p>
               <div className="mt-4 p-4 bg-red-50 rounded-lg border border-red-100">
                 <p className="text-sm text-red-800">
-                  <span className="font-semibold">Warning:</span> This will permanently remove this service record from your earnings history.
+                  <span className="font-semibold">{t('earnings.warning')}:</span> {t('earnings.deleteWarningMessage')}
                 </p>
               </div>
             </div>
@@ -773,13 +778,13 @@ export function EarningsPage() {
                 onClick={cancelDelete}
                 className="flex-1 px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 shadow-sm"
               >
-                No, Keep It
+                {t('earnings.noKeepIt')}
               </button>
               <button
                 onClick={confirmDelete}
                 className="flex-1 px-6 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
-                Yes, Delete
+                {t('earnings.yesDelete')}
               </button>
             </div>
           </div>
@@ -798,14 +803,14 @@ export function EarningsPage() {
                     <Edit2 className="w-6 h-6 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900">Edit Service Entry</h3>
-                    <p className="text-sm text-gray-500 mt-1">Update service details</p>
+                    <h3 className="text-xl font-semibold text-gray-900">{t('earnings.editModalTitle')}</h3>
+                    <p className="text-sm text-gray-500 mt-1">{t('earnings.editModalSubtitle')}</p>
                   </div>
                 </div>
                 <button
                   onClick={cancelEdit}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  title="Close"
+                  title={t('earnings.close')}
                 >
                   <X className="w-5 h-5 text-gray-500" />
                 </button>
@@ -816,17 +821,17 @@ export function EarningsPage() {
             <div className="p-6 space-y-6">
               {/* Service Information Section */}
               <div className="border-b border-gray-200 pb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Service Information</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('routesheet.serviceInformation')}</h3>
 
                 {/* Service Type - Dropdown FIRST */}
                 <div className="mb-4">
                   <MobileSelect
-                    label="Service Type"
+                    label={t('routesheet.selectServiceType')}
                     required
                     value={editForm.service}
                     onChange={(value) => handleEditFormChange('service', value)}
-                    options={CLIENT_SERVICES.map(s => ({ value: s.name, label: s.name }))}
-                    placeholder="-- Select Service Type --"
+                    options={getClientServices(t).map(s => ({ value: s.name, label: s.name }))}
+                    placeholder={t('routesheet.selectServiceTypePlaceholder')}
                     searchable
                   />
                 </div>
@@ -835,14 +840,14 @@ export function EarningsPage() {
                 {editForm.service && isClientRequired && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Select Client <span className="text-red-500">*</span>
+                      {t('routesheet.selectClient')} <span className="text-red-500">*</span>
                     </label>
                     <select
                       value={editForm.patientCd}
                       onChange={(e) => handleEditFormChange('patientCd', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
-                      <option value="">-- Select Client --</option>
+                      <option value="">{t('routesheet.selectClientPlaceholder')}</option>
                       {patients.map((patient) => (
                         <option key={patient} value={patient}>
                           {patient}
@@ -855,13 +860,13 @@ export function EarningsPage() {
 
               {/* Visit Details Section */}
               <div className="border-b border-gray-200 pb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Visit Details</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('routesheet.visitDetails')}</h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Service Date */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Service Date
+                      {t('routesheet.serviceDate')}
                     </label>
                     <input
                       type="date"
@@ -874,7 +879,7 @@ export function EarningsPage() {
                   {/* Time In */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Time In
+                      {t('routesheet.timeIn')}
                     </label>
                     <input
                       type="time"
@@ -887,7 +892,7 @@ export function EarningsPage() {
                   {/* Time Out */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Time Out
+                      {t('routesheet.timeOut')}
                     </label>
                     <input
                       type="time"
@@ -901,7 +906,7 @@ export function EarningsPage() {
 
               {/* Comments Section */}
               <div className="border-b border-gray-200 pb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Comments (Optional)</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('routesheet.comments')}</h3>
                 <div className="space-y-4">
                   {/* Comment Selection */}
                   <div>
@@ -915,7 +920,7 @@ export function EarningsPage() {
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
-                      {COMMENT_OPTIONS.map((option) => (
+                      {getCommentOptions(t).map((option) => (
                         <option key={option.value} value={option.value}>
                           {option.label}
                         </option>
@@ -927,14 +932,14 @@ export function EarningsPage() {
                   {editForm.selectedComment === 'Other' && (
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Please specify
+                        {t('earnings.pleaseSpecify')}
                       </label>
                       <textarea
                         value={editForm.otherComments}
                         onChange={(e) => handleEditFormChange('otherComments', e.target.value)}
                         rows={4}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                        placeholder="Enter Name or Initial"
+                        placeholder={t('routesheet.enterNameOrInitial')}
                       />
                     </div>
                   )}
@@ -944,38 +949,38 @@ export function EarningsPage() {
               {/* Signature Section */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Signature
+                  {t('routesheet.signature')}
                 </label>
                 <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 bg-gray-50">
                   {signature ? (
                     <div className="space-y-3">
-                      <img src={signature} alt="Signature" className="max-h-32 mx-auto border border-gray-200 rounded-lg bg-white p-2" />
+                      <img src={signature} alt={t('routesheet.signature')} className="max-h-32 mx-auto border border-gray-200 rounded-lg bg-white p-2" />
                       <div className="flex gap-2 justify-center">
                         <button
                           type="button"
                           onClick={() => setShowSignatureModal(true)}
                           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                         >
-                          Change Signature
+                          {t('earnings.changeSignature')}
                         </button>
                         <button
                           type="button"
                           onClick={handleClearSignature}
                           className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
                         >
-                          Clear
+                          {t('earnings.clear')}
                         </button>
                       </div>
                     </div>
                   ) : (
                     <div className="text-center">
-                      <p className="text-gray-500 mb-3">No signature yet</p>
+                      <p className="text-gray-500 mb-3">{t('earnings.noSignatureYet')}</p>
                       <button
                         type="button"
                         onClick={() => setShowSignatureModal(true)}
                         className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-semibold"
                       >
-                        Add Signature
+                        {t('routesheet.addSignature')}
                       </button>
                     </div>
                   )}
@@ -985,13 +990,13 @@ export function EarningsPage() {
               {/* Estimated Payment Display - Read Only */}
               <div className="bg-green-50 p-6 rounded-lg border-2 border-green-200">
                 <h3 className="text-lg font-semibold text-green-800 mb-2">
-                  Estimated Payment
+                  {t('routesheet.estimatedPayment')}
                 </h3>
                 <p className="text-3xl font-bold text-green-900">
                   ${parseFloat(editForm.estimatedPayment || '0').toFixed(2)}
                 </p>
                 <p className="text-sm text-green-700 mt-2">
-                  This amount is calculated based on the service contract
+                  {t('earnings.contractBasedAmount')}
                 </p>
               </div>
             </div>
@@ -1002,13 +1007,13 @@ export function EarningsPage() {
                 onClick={cancelEdit}
                 className="flex-1 px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 shadow-sm"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 onClick={confirmEdit}
                 className="flex-1 px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
-                Save Changes
+                {t('earnings.saveChanges')}
               </button>
             </div>
           </div>
@@ -1022,7 +1027,7 @@ export function EarningsPage() {
             {/* Modal Header */}
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">Add Your Signature</h3>
+                <h3 className="text-lg font-semibold text-gray-900">{t('routesheet.addYourSignature')}</h3>
                 <button
                   onClick={() => setShowSignatureModal(false)}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -1045,7 +1050,7 @@ export function EarningsPage() {
                   }`}
                 >
                   <Edit3 className="w-4 h-4" />
-                  Draw
+                  {t('routesheet.draw')}
                 </button>
                 <button
                   type="button"
@@ -1057,7 +1062,7 @@ export function EarningsPage() {
                   }`}
                 >
                   <Type className="w-4 h-4" />
-                  Type
+                  {t('routesheet.type')}
                 </button>
               </div>
 
@@ -1079,7 +1084,7 @@ export function EarningsPage() {
                     onClick={() => sigCanvasRef.current?.clear()}
                     className="mt-2 text-sm text-gray-600 hover:text-gray-800"
                   >
-                    Clear Canvas
+                    {t('routesheet.clearCanvas')}
                   </button>
                 </div>
               )}
@@ -1089,34 +1094,34 @@ export function EarningsPage() {
                 <div>
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Font Style
+                      {t('routesheet.fontStyle')}
                     </label>
                     <select
                       value={selectedFont}
                       onChange={(e) => setSelectedFont(e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
-                      <option value="Dancing Script">Dancing Script</option>
-                      <option value="Pacifico">Pacifico</option>
-                      <option value="Great Vibes">Great Vibes</option>
-                      <option value="Allura">Allura</option>
+                      <option value="Dancing Script">{t('signatureFonts.dancingScript')}</option>
+                      <option value="Pacifico">{t('signatureFonts.pacifico')}</option>
+                      <option value="Great Vibes">{t('signatureFonts.greatVibes')}</option>
+                      <option value="Allura">{t('signatureFonts.allura')}</option>
                     </select>
                   </div>
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Type Your Name
+                      {t('routesheet.typeYourName')}
                     </label>
                     <input
                       type="text"
                       value={typedName}
                       onChange={(e) => setTypedName(e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Your name"
+                      placeholder={t('earnings.yourName')}
                     />
                   </div>
                   <div className="border-2 border-gray-200 rounded-lg p-4 bg-white min-h-[100px] flex items-center justify-center">
                     <div style={{ fontFamily: selectedFont, fontSize: '36px' }}>
-                      {typedName || 'Preview'}
+                      {typedName || t('earnings.preview')}
                     </div>
                   </div>
                 </div>
@@ -1129,13 +1134,13 @@ export function EarningsPage() {
                 onClick={() => setShowSignatureModal(false)}
                 className="flex-1 px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-200"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 onClick={handleSignatureCapture}
                 className="flex-1 px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all duration-200"
               >
-                Save Signature
+                {t('earnings.saveSignature')}
               </button>
             </div>
           </div>

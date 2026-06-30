@@ -185,7 +185,7 @@ export function HamburgerMenu() {
                   className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-all"
                 >
                   <DollarSign className="w-5 h-5" />
-                  <span className="font-medium">Services & Earnings</span>
+                  <span className="font-medium">{t('quickActions.serviceEarnings')}</span>
                 </button>
                 <button
                   onClick={() => handleNavigate('/documents')}

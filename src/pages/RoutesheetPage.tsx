@@ -8,58 +8,59 @@ import toast from 'react-hot-toast'
 import { Save, X, Edit3, Type } from 'lucide-react'
 import dayjs from 'dayjs'
 import SignatureCanvas from 'react-signature-canvas'
+import { useTranslation } from 'react-i18next'
 
-const CLIENT_SERVICES = [
-  { code: "IV", name: "Initial Visit", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "MSW", "Director of Nurse", "LPN", "Medical Director", "Chaplain"] },
+const getClientServices = (t: any) => [
+  { code: "IV", name: t('services.initialVisit'), isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "MSW", "Director of Nurse", "LPN", "Medical Director", "Chaplain"] },
   { code: "PRN", name: "PRN", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse", "LPN", "Medical Director"] },
-  { code: "DC", name: "Discharge", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
-  { code: "SUP", name: "Supervisory Visit", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
+  { code: "DC", name: t('services.discharge'), isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
+  { code: "SUP", name: t('services.supervisoryVisit'), isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
   { code: "HUV", name: "HUV", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
   { code: "SFV", name: "SFV", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse", "LPN"] },
-  { code: "IDT-PR", name: "IDT Meeting In Person", isClientRequired: false, permission: ["*"] },
-  { code: "IDT-NT", name: "IDT Meeting Thru Notes", isClientRequired: false, permission: ["*"] },
-  { code: "IDT-PH", name: "IDT Meeting Via Phone", isClientRequired: false, permission: ["*"] },
-  { code: "OC", name: "On-Call", isClientRequired: false, permission: ["*"] },
-  { code: "RC", name: "Recertification Visit", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
-  { code: "SM", name: "Staff Meeting", isClientRequired: false, permission: ["*"] },
-  { code: "IN", name: "In-Service", isClientRequired: false, permission: ["*"] },
-  { code: "EV", name: "Evaluation Visit", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse", "Nurse Practioner"] },
-  { code: "SWV", name: "Social Worker Visit", isClientRequired: true, permission: ["MSW"] },
-  { code: "RV", name: "Regular Visit", isClientRequired: true, permission: ["Certified Nurse Assistant", "Case Manager", "Registered Nurse", "MSW", "Director of Nurse", "LPN", "Medical Director", "Chaplain"] },
-  { code: "BV", name: "Bereavement Visit", isClientRequired: true, permission: ["Chaplain", "Bereavement"] },
-  { code: "F/UV", name: "Follow Up Visit", isClientRequired: true, permission: ["Case Manager", "MSW", "Director of Nurse", "Registered Nurse", "LPN", "Medical Director", "Chaplain"] },
-  { code: "O", name: "Orientation", isClientRequired: false, permission: ["*"] },
-  { code: "VV", name: "Volunteer Visit", isClientRequired: true, permission: ["Volunteer"] },
-  { code: "DPV", name: "Death pronouncement", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
-  { code: "SOC", name: "SOC/Assessment", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
-  { code: "APV", name: "Admission Visit", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
-  { code: "PAV", name: "Potential Admission Visit", isClientRequired: false, permission: ["Certified Nurse Assistant", "Case Manager", "Registered Nurse", "MSW", "Director of Nurse", "LPN", "Medical Director", "Chaplain"] },
-  { code: "REA", name: "Reassessment Visit", isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
-  { code: "ATD", name: "Attendance", isClientRequired: false, permission: ["Administrative Manager", "Case Manager", "Director of Nurse", "Registered Nurse", "Office Manager", "Administrator"] },
-  { code: "OTH", name: "Other", isClientRequired: false, permission: ["*"] }
+  { code: "IDT-PR", name: t('services.idtMeetingInPerson'), isClientRequired: false, permission: ["*"] },
+  { code: "IDT-NT", name: t('services.idtMeetingThruNotes'), isClientRequired: false, permission: ["*"] },
+  { code: "IDT-PH", name: t('services.idtMeetingViaPhone'), isClientRequired: false, permission: ["*"] },
+  { code: "OC", name: t('services.onCall'), isClientRequired: false, permission: ["*"] },
+  { code: "RC", name: t('services.recertificationVisit'), isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
+  { code: "SM", name: t('services.staffMeeting'), isClientRequired: false, permission: ["*"] },
+  { code: "IN", name: t('services.inService'), isClientRequired: false, permission: ["*"] },
+  { code: "EV", name: t('services.evaluationVisit'), isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse", "Nurse Practioner"] },
+  { code: "SWV", name: t('services.socialWorkerVisit'), isClientRequired: true, permission: ["MSW"] },
+  { code: "RV", name: t('services.regularVisit'), isClientRequired: true, permission: ["Certified Nurse Assistant", "Case Manager", "Registered Nurse", "MSW", "Director of Nurse", "LPN", "Medical Director", "Chaplain"] },
+  { code: "BV", name: t('services.bereavementVisit'), isClientRequired: true, permission: ["Chaplain", "Bereavement"] },
+  { code: "F/UV", name: t('services.followUpVisit'), isClientRequired: true, permission: ["Case Manager", "MSW", "Director of Nurse", "Registered Nurse", "LPN", "Medical Director", "Chaplain"] },
+  { code: "O", name: t('services.orientation'), isClientRequired: false, permission: ["*"] },
+  { code: "VV", name: t('services.volunteerVisit'), isClientRequired: true, permission: ["Volunteer"] },
+  { code: "DPV", name: t('services.deathPronouncement'), isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
+  { code: "SOC", name: t('services.socAssessment'), isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
+  { code: "APV", name: t('services.admissionVisit'), isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
+  { code: "PAV", name: t('services.potentialAdmissionVisit'), isClientRequired: false, permission: ["Certified Nurse Assistant", "Case Manager", "Registered Nurse", "MSW", "Director of Nurse", "LPN", "Medical Director", "Chaplain"] },
+  { code: "REA", name: t('services.reassessmentVisit'), isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
+  { code: "ATD", name: t('services.attendance'), isClientRequired: false, permission: ["Administrative Manager", "Case Manager", "Director of Nurse", "Registered Nurse", "Office Manager", "Administrator"] },
+  { code: "OTH", name: t('services.other'), isClientRequired: false, permission: ["*"] }
 ]
 
-const COMMENT_OPTIONS = [
-  { value: '', label: '-- Select a Comment --' },
-  { value: 'Refused Visit', label: 'Refused Visit' },
-  { value: 'No One Answering', label: 'No One Answering' },
-  { value: 'Client Hospitalized', label: 'Client Hospitalized' },
-  { value: 'Client Unavailable / Not Home', label: 'Client Unavailable / Not Home' },
-  { value: 'Visit Rescheduled', label: 'Visit Rescheduled' },
-  { value: 'Client Deceased', label: 'Client Deceased' },
-  { value: 'Client on Vacation / Out of Town', label: 'Client on Vacation / Out of Town' },
-  { value: 'Caregiver Cancelled', label: 'Caregiver Cancelled' },
-  { value: 'Weather / Road Conditions', label: 'Weather / Road Conditions' },
-  { value: 'Wrong Address / Unable to Locate Client', label: 'Wrong Address / Unable to Locate Client' },
-  { value: 'Client Transferred to Facility', label: 'Client Transferred to Facility' },
-  { value: 'Visit Completed – No Issues', label: 'Visit Completed – No Issues' },
+const getCommentOptions = (t: any) => [
+  { value: '', label: t('comments.selectComment') },
+  { value: 'Refused Visit', label: t('comments.refusedVisit') },
+  { value: 'No One Answering', label: t('comments.noOneAnswering') },
+  { value: 'Client Hospitalized', label: t('comments.clientHospitalized') },
+  { value: 'Client Unavailable / Not Home', label: t('comments.clientUnavailable') },
+  { value: 'Visit Rescheduled', label: t('comments.visitRescheduled') },
+  { value: 'Client Deceased', label: t('comments.clientDeceased') },
+  { value: 'Client on Vacation / Out of Town', label: t('comments.clientOnVacation') },
+  { value: 'Caregiver Cancelled', label: t('comments.caregiverCancelled') },
+  { value: 'Weather / Road Conditions', label: t('comments.weatherConditions') },
+  { value: 'Wrong Address / Unable to Locate Client', label: t('comments.wrongAddress') },
+  { value: 'Client Transferred to Facility', label: t('comments.clientTransferred') },
+  { value: 'Visit Completed – No Issues', label: t('comments.visitCompleted') },
   { value: 'HUV1', label: 'HUV1' },
   { value: 'HUV2', label: 'HUV2' },
-  { value: 'Hope Admission', label: 'Hope Admission' },
+  { value: 'Hope Admission', label: t('comments.hopeAdmission') },
   { value: 'SFV1', label: 'SFV1' },
   { value: 'SFV2', label: 'SFV2' },
-  { value: 'SFV Admission', label: 'SFV Admission' },
-  { value: 'Other', label: 'Other' }
+  { value: 'SFV Admission', label: t('comments.sfvAdmission') },
+  { value: 'Other', label: t('comments.other') }
 ]
 
 interface Assignment {
@@ -85,6 +86,7 @@ interface Contract {
 }
 
 export function RoutesheetPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { employee, authUser } = useAuth()
   const sigCanvasRef = useRef<SignatureCanvas>(null)
@@ -93,7 +95,7 @@ export function RoutesheetPage() {
   const [patients, setPatients] = useState<string[]>([])
   const [selectedPatient, setSelectedPatient] = useState('')
   const [service, setService] = useState('')
-  const [availableServices, setAvailableServices] = useState<typeof CLIENT_SERVICES>([])
+  const [availableServices, setAvailableServices] = useState<ReturnType<typeof getClientServices>>([])
   const [isClientRequired, setIsClientRequired] = useState(false)
   const [serviceDate, setServiceDate] = useState(dayjs().format('YYYY-MM-DD'))
   const [timeIn, setTimeIn] = useState(dayjs().format('HH:mm'))
@@ -126,6 +128,7 @@ export function RoutesheetPage() {
   useEffect(() => {
     if (!employee?.position) return
 
+    const CLIENT_SERVICES = getClientServices(t)
     const filtered = CLIENT_SERVICES.filter(s => {
       if (s.permission.length === 1 && s.permission[0] === '*') {
         return true
@@ -137,9 +140,9 @@ export function RoutesheetPage() {
 
     // Set default service to "Regular Visit" if available and no service is currently selected
     if (!service) {
-      const regularVisit = filtered.find(s => s.name === 'Regular Visit')
+      const regularVisit = filtered.find(s => s.name === t('services.regularVisit'))
       if (regularVisit) {
-        setService('Regular Visit')
+        setService(t('services.regularVisit'))
         setIsClientRequired(regularVisit.isClientRequired)
         // Set default comment for visit service
         if (!comments) {
@@ -150,7 +153,7 @@ export function RoutesheetPage() {
     }
 
     console.log('📋 Available services for', employee.position, ':', filtered)
-  }, [employee?.position])
+  }, [employee?.position, t])
 
   // Load assignments and contracts
   useEffect(() => {
@@ -228,7 +231,7 @@ export function RoutesheetPage() {
     }
 
     // Special handling for Attendance service - set time to 8am-5pm
-    if (serviceName === 'Attendance') {
+    if (serviceName === t('services.attendance')) {
       setTimeIn('08:00')
       setTimeOut('17:00')
     }
@@ -238,13 +241,13 @@ export function RoutesheetPage() {
       const lowerService = name.toLowerCase()
       return lowerService.includes('visit') ||
              lowerService === 'rv' ||
-             lowerService === 'regular visit' ||
+             lowerService === t('services.regularVisit').toLowerCase() ||
              lowerService === 'swv' ||
-             lowerService === 'social worker visit'
+             lowerService === t('services.socialWorkerVisit').toLowerCase()
     }
 
     // Always set default comment based on service type when service changes
-    if (serviceName === 'Potential Admission Visit') {
+    if (serviceName === t('services.potentialAdmissionVisit')) {
       setComments('Other')
       console.log('✅ Default comment set to Other for Potential Admission Visit')
     } else if (isVisitService(serviceName)) {
@@ -345,24 +348,24 @@ export function RoutesheetPage() {
     const newErrors = { patient: '', signature: '' }
 
     if (!service) {
-      toast.error('Please select a service type')
+      toast.error(t('routesheet.pleaseSelectService'))
       isValid = false
     }
 
     // Only require patient if service requires it
     if (isClientRequired && !selectedPatient) {
-      newErrors.patient = 'Please select a client'
+      newErrors.patient = t('routesheet.pleaseSelectClient')
       isValid = false
     }
 
     if (!signature) {
-      newErrors.signature = 'Signature is required'
+      newErrors.signature = t('routesheet.signatureRequired')
       isValid = false
     }
 
     // Validate "Other" comments
     if (comments === 'Other' && !otherComments.trim()) {
-      toast.error('Please specify other comment')
+      toast.error(t('routesheet.pleaseSpecifyComment'))
       isValid = false
     }
 
@@ -432,7 +435,7 @@ export function RoutesheetPage() {
 
       if (error) throw error
 
-      toast.success('Route sheet submitted successfully!')
+      toast.success(t('routesheet.submitSuccess'))
 
       setTimeout(() => {
         navigate('/dashboard')
@@ -440,7 +443,7 @@ export function RoutesheetPage() {
 
     } catch (error: any) {
       console.error('❌ Error submitting routesheet:', error)
-      toast.error('Failed to submit: ' + error.message)
+      toast.error(t('routesheet.submitError') + ': ' + error.message)
     } finally {
       setSubmitting(false)
     }
@@ -462,7 +465,7 @@ export function RoutesheetPage() {
         setSignatureModal(false)
         setErrors({ ...errors, signature: '' })
       } else {
-        toast.error('Please draw your signature')
+        toast.error(t('routesheet.pleaseDrawSignature'))
       }
     } else if (signatureMode === 'type') {
       if (typedName.trim()) {
@@ -485,7 +488,7 @@ export function RoutesheetPage() {
           setErrors({ ...errors, signature: '' })
         }
       } else {
-        toast.error('Please type your name')
+        toast.error(t('routesheet.pleaseTypeName'))
       }
     }
   }
@@ -502,7 +505,7 @@ export function RoutesheetPage() {
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading...</p>
+            <p className="text-gray-600">{t('common.loading')}</p>
           </div>
         </div>
       </div>
@@ -524,7 +527,7 @@ export function RoutesheetPage() {
                 style={{ mixBlendMode: 'multiply' }}
               />
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900 text-center">
-                Route Sheet
+                {t('routesheet.title')}
               </h1>
             </div>
           </div>
@@ -536,15 +539,15 @@ export function RoutesheetPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Service Selection - FIRST */}
           <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Service Information</h2>
+            <h2 className="text-lg font-semibold mb-4">{t('routesheet.serviceInformation')}</h2>
             <div className="space-y-4">
               <MobileSelect
-                label="Select Service Type"
+                label={t('routesheet.selectServiceType')}
                 required
                 value={service}
                 onChange={handleServiceChange}
                 options={availableServices.map(s => ({ value: s.name, label: s.name }))}
-                placeholder="-- Select Service Type --"
+                placeholder={t('routesheet.selectServiceTypePlaceholder')}
                 searchable
               />
 
@@ -552,12 +555,12 @@ export function RoutesheetPage() {
               {service && isClientRequired && (
                 <div>
                   <MobileSelect
-                    label="Select Client"
+                    label={t('routesheet.selectClient')}
                     required
                     value={selectedPatient}
                     onChange={handlePatientChange}
                     options={patients.map(p => ({ value: p, label: p }))}
-                    placeholder="-- Select Client --"
+                    placeholder={t('routesheet.selectClientPlaceholder')}
                     error={!!errors.patient}
                   />
                   {errors.patient && (
@@ -570,11 +573,11 @@ export function RoutesheetPage() {
 
           {/* Date and Time */}
           <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Visit Details</h2>
+            <h2 className="text-lg font-semibold mb-4">{t('routesheet.visitDetails')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Service Date
+                  {t('routesheet.serviceDate')}
                 </label>
                 <input
                   type="date"
@@ -586,7 +589,7 @@ export function RoutesheetPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Time In
+                  {t('routesheet.timeIn')}
                 </label>
                 <input
                   type="time"
@@ -608,7 +611,7 @@ export function RoutesheetPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Time Out
+                  {t('routesheet.timeOut')}
                 </label>
                 <input
                   type="time"
@@ -621,7 +624,7 @@ export function RoutesheetPage() {
 
             <div className="mt-4 p-3 bg-blue-50 rounded-lg">
               <p className="text-sm text-blue-800">
-                <strong>Duration:</strong> {calculateDuration()}
+                <strong>{t('routesheet.duration')}:</strong> {calculateDuration()}
               </p>
             </div>
           </div>
@@ -629,10 +632,10 @@ export function RoutesheetPage() {
           {/* Mileage */}
           {contract?.isMileageRate && (
             <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-lg font-semibold mb-4">Mileage</h2>
+              <h2 className="text-lg font-semibold mb-4">{t('routesheet.mileage')}</h2>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Miles Driven
+                  {t('routesheet.milesDriven')}
                 </label>
                 <input
                   type="number"
@@ -640,13 +643,13 @@ export function RoutesheetPage() {
                   onChange={(e) => setMileage(parseFloat(e.target.value) || 0)}
                   step="0.1"
                   min="0"
-                  placeholder="Enter miles"
+                  placeholder={t('routesheet.enterMiles')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
                 {contract.mileageRate && (
                   <p className="text-sm text-gray-600 mt-2">
-                    Rate: ${contract.mileageRate.toFixed(2)}/mile
-                    {contract.maxReimbursement && ` (Max: $${contract.maxReimbursement.toFixed(2)})`}
+                    {t('routesheet.rate')}: ${contract.mileageRate.toFixed(2)}/mile
+                    {contract.maxReimbursement && ` (${t('routesheet.max')}: $${contract.maxReimbursement.toFixed(2)})`}
                   </p>
                 )}
               </div>
@@ -655,7 +658,7 @@ export function RoutesheetPage() {
 
           {/* Comments */}
           <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Comments (Optional)</h2>
+            <h2 className="text-lg font-semibold mb-4">{t('routesheet.comments')}</h2>
             <div className="space-y-4">
               <MobileSelect
                 label=""
@@ -666,21 +669,21 @@ export function RoutesheetPage() {
                     setOtherComments('')
                   }
                 }}
-                options={COMMENT_OPTIONS}
-                placeholder="-- Select a Comment --"
+                options={getCommentOptions(t)}
+                placeholder={t('comments.selectComment')}
               />
 
               {comments === 'Other' && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Other Comment <span className="text-red-500">*</span>
+                    {t('routesheet.otherComment')} <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     value={otherComments}
                     onChange={(e) => setOtherComments(e.target.value)}
                     rows={4}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Enter Name or Initial"
+                    placeholder={t('routesheet.enterNameOrInitial')}
                   />
                 </div>
               )}
@@ -690,29 +693,29 @@ export function RoutesheetPage() {
           {/* Signature */}
           <div className="bg-white p-6 rounded-lg shadow">
             <h2 className="text-lg font-semibold mb-4">
-              Signature <span className="text-red-500">*</span>
+              {t('routesheet.signature')} <span className="text-red-500">*</span>
             </h2>
             <div className="border-2 border-gray-300 rounded-lg p-4">
               {signature ? (
                 <div>
-                  <img src={signature} alt="Signature" className="max-h-32 mx-auto" />
+                  <img src={signature} alt={t('routesheet.signature')} className="max-h-32 mx-auto" />
                   <button
                     type="button"
                     onClick={handleClearSignature}
                     className="mt-2 text-sm text-red-600 hover:text-red-800"
                   >
-                    Clear Signature
+                    {t('routesheet.clearSignature')}
                   </button>
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-gray-500 mb-4">Signature required</p>
+                  <p className="text-gray-500 mb-4">{t('routesheet.signatureRequired')}</p>
                   <button
                     type="button"
                     onClick={handleOpenSignatureModal}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                   >
-                    Add Signature
+                    {t('routesheet.addSignature')}
                   </button>
                 </div>
               )}
@@ -726,14 +729,14 @@ export function RoutesheetPage() {
           {contract && (
             <div className="bg-green-50 p-6 rounded-lg shadow">
               <h2 className="text-lg font-semibold text-green-800 mb-2">
-                Estimated Payment
+                {t('routesheet.estimatedPayment')}
               </h2>
               <p className="text-3xl font-bold text-green-900">
                 ${calculateEstimatedPayment().toFixed(2)}
               </p>
               <div className="mt-3 space-y-1">
                 <p className="text-sm text-green-700">
-                  Service: ${(() => {
+                  {t('routesheet.service')}: ${(() => {
                     let servicePayment = parseFloat(contract.serviceRate?.toString() || '0')
                     if (contract.serviceRateType?.toLowerCase() === 'hourly') {
                       const start = dayjs(`${serviceDate} ${timeIn}`)
@@ -747,7 +750,7 @@ export function RoutesheetPage() {
                 </p>
                 {contract.isMileageRate && mileage > 0 && (
                   <p className="text-sm text-green-700">
-                    Mileage: ${(() => {
+                    {t('routesheet.mileage')}: ${(() => {
                       let mileageCost = contract.mileageRate * mileage
                       if (contract.maxReimbursement && mileageCost > contract.maxReimbursement) {
                         mileageCost = contract.maxReimbursement
@@ -770,12 +773,12 @@ export function RoutesheetPage() {
               {submitting ? (
                 <>
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  Submitting...
+                  {t('common.submitting')}
                 </>
               ) : (
                 <>
                   <Save className="w-5 h-5" />
-                  Submit Route Sheet
+                  {t('routesheet.submit')}
                 </>
               )}
             </button>
@@ -785,7 +788,7 @@ export function RoutesheetPage() {
               className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
             >
               <X className="w-5 h-5" />
-              Cancel
+              {t('common.cancel')}
             </button>
           </div>
         </form>
@@ -816,7 +819,7 @@ export function RoutesheetPage() {
               <div className="sm:flex sm:items-start">
                 <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
                   <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                    Add Your Signature
+                    {t('routesheet.addYourSignature')}
                   </h3>
 
                   {/* Mode Toggle */}
@@ -831,7 +834,7 @@ export function RoutesheetPage() {
                       }`}
                     >
                       <Edit3 className="w-4 h-4" />
-                      Draw
+                      {t('routesheet.draw')}
                     </button>
                     <button
                       type="button"
@@ -843,7 +846,7 @@ export function RoutesheetPage() {
                       }`}
                     >
                       <Type className="w-4 h-4" />
-                      Type
+                      {t('routesheet.type')}
                     </button>
                   </div>
 
@@ -865,7 +868,7 @@ export function RoutesheetPage() {
                         onClick={() => sigCanvasRef.current?.clear()}
                         className="mt-2 text-sm text-gray-600 hover:text-gray-800"
                       >
-                        Clear Canvas
+                        {t('routesheet.clearCanvas')}
                       </button>
                     </div>
                   )}
@@ -875,28 +878,28 @@ export function RoutesheetPage() {
                     <div>
                       <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Font Style
+                          {t('routesheet.fontStyle')}
                         </label>
                         <select
                           value={selectedFont}
                           onChange={(e) => setSelectedFont(e.target.value)}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         >
-                          <option value="Dancing Script">Dancing Script</option>
-                          <option value="Pacifico">Pacifico</option>
-                          <option value="Great Vibes">Great Vibes</option>
-                          <option value="Allura">Allura</option>
+                          <option value="Dancing Script">{t('signatureFonts.dancingScript')}</option>
+                          <option value="Pacifico">{t('signatureFonts.pacifico')}</option>
+                          <option value="Great Vibes">{t('signatureFonts.greatVibes')}</option>
+                          <option value="Allura">{t('signatureFonts.allura')}</option>
                         </select>
                       </div>
                       <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Type Your Name
+                          {t('routesheet.typeYourName')}
                         </label>
                         <input
                           type="text"
                           value={typedName}
                           onChange={(e) => setTypedName(e.target.value)}
-                          placeholder="Enter your full name"
+                          placeholder={t('routesheet.enterFullName')}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
@@ -922,14 +925,14 @@ export function RoutesheetPage() {
                       onClick={handleConfirmSignature}
                       className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto sm:text-sm"
                     >
-                      Confirm Signature
+                      {t('routesheet.confirmSignature')}
                     </button>
                     <button
                       type="button"
                       onClick={() => setSignatureModal(false)}
                       className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm"
                     >
-                      Cancel
+                      {t('common.cancel')}
                     </button>
                   </div>
                 </div>

@@ -8,6 +8,7 @@ import { HamburgerMenu } from '../components/HamburgerMenu'
 import ReactSignatureCanvas from 'react-signature-canvas'
 import Webcam from 'react-webcam'
 import toast from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
 
 const FACING_MODE_USER = 'user'
 const FACING_MODE_ENVIRONMENT = 'environment'
@@ -26,6 +27,7 @@ interface Distribution {
 export function DeliveryPage() {
   const navigate = useNavigate()
   const { employee } = useAuth()
+  const { t } = useTranslation()
   const sigCanvas = useRef<ReactSignatureCanvas>(null)
   const webcamRef = useRef<Webcam>(null)
 
@@ -84,7 +86,7 @@ export function DeliveryPage() {
 
     } catch (error) {
       console.error('❌ Error fetching distributions:', error)
-      toast.error('Failed to fetch delivery data')
+      toast.error(t('delivery.fetchError'))
     } finally {
       setLoading(false)
     }
@@ -147,12 +149,12 @@ export function DeliveryPage() {
     let isValid = true
 
     if (!isSigned) {
-      setSignatureError('Signature is required')
+      setSignatureError(t('delivery.signatureRequired'))
       isValid = false
     }
 
     if (!receivedBy.trim()) {
-      setReceivedByError('Received by is required')
+      setReceivedByError(t('delivery.receivedByRequired'))
       isValid = false
     }
 
@@ -236,7 +238,7 @@ export function DeliveryPage() {
 
       if (updateError) throw updateError
 
-      toast.success('Supplies have been successfully delivered!')
+      toast.success(t('delivery.successMessage'))
 
       // Reset form
       setClient('')
@@ -250,7 +252,7 @@ export function DeliveryPage() {
 
     } catch (error) {
       console.error('❌ Error submitting delivery:', error)
-      toast.error('Failed to submit delivery')
+      toast.error(t('delivery.submitError'))
     }
   }
 
@@ -269,7 +271,7 @@ export function DeliveryPage() {
                 style={{ mixBlendMode: 'multiply' }}
               />
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900 text-center">
-                Delivery Tracking
+                {t('delivery.title')}
               </h1>
             </div>
           </div>
@@ -283,18 +285,18 @@ export function DeliveryPage() {
           {/* Client Selection */}
           <div className="mb-6">
             <MobileSelect
-              label={`Select Client ${clients.length > 0 ? `(${clients.length})` : ''}`}
+              label={`${t('delivery.selectClient')} ${clients.length > 0 ? `(${clients.length})` : ''}`}
               value={client}
               onChange={handleClientChange}
               options={[
-                { value: '', label: 'Select One' },
+                { value: '', label: t('delivery.selectOne') },
                 ...clients.map(c => ({ value: c, label: c }))
               ]}
-              placeholder="Select One"
+              placeholder={t('delivery.selectOne')}
             />
             {clients.length === 0 && !loading && (
               <p className="mt-2 text-sm text-amber-600">
-                There are currently no supplies available for client delivery. Please refresh the page to check for any available supplies.
+                {t('delivery.noSupplies')}
               </p>
             )}
           </div>
@@ -304,15 +306,15 @@ export function DeliveryPage() {
             <>
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  Supplies ({selectedDistributions.length})
+                  {t('delivery.supplies')} ({selectedDistributions.length})
                 </h3>
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</th>
+                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('delivery.itemNumber')}</th>
+                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('delivery.item')}</th>
+                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('delivery.quantity')}</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -335,14 +337,14 @@ export function DeliveryPage() {
               {/* Signature */}
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-lg font-semibold text-gray-900">Signature</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">{t('delivery.signature')}</h3>
                   {isSigned && (
                     <button
                       onClick={clearSignature}
                       className="flex items-center gap-1 text-red-600 hover:text-red-700 text-sm"
                     >
                       <Trash2 className="w-4 h-4" />
-                      Clear
+                      {t('delivery.clear')}
                     </button>
                   )}
                 </div>
@@ -364,7 +366,7 @@ export function DeliveryPage() {
               {/* Received By */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Received By:
+                  {t('delivery.receivedBy')}
                 </label>
                 <input
                   type="text"
@@ -374,7 +376,7 @@ export function DeliveryPage() {
                     setReceivedByError('')
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                  placeholder="Enter name"
+                  placeholder={t('delivery.enterName')}
                 />
                 {receivedByError && (
                   <p className="mt-1 text-sm text-red-600">{receivedByError}</p>
@@ -385,13 +387,13 @@ export function DeliveryPage() {
               {imgSrc && (
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-medium text-gray-700">Photo Evidence</h3>
+                    <h3 className="text-sm font-medium text-gray-700">{t('delivery.photoEvidence')}</h3>
                     <button
                       onClick={() => setImgSrc('')}
                       className="flex items-center gap-1 text-red-600 hover:text-red-700 text-sm"
                     >
                       <Trash2 className="w-4 h-4" />
-                      Delete
+                      {t('common.delete')}
                     </button>
                   </div>
                   <div className="w-full">
@@ -411,14 +413,14 @@ export function DeliveryPage() {
                   className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   <Camera className="w-5 h-5" />
-                  {imgSrc ? 'Retake Photo' : 'Take Photo'}
+                  {imgSrc ? t('delivery.retakePhoto') : t('delivery.takePhoto')}
                 </button>
                 <button
                   onClick={handleSubmit}
                   className="flex items-center gap-2 px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
                 >
                   <Check className="w-5 h-5" />
-                  Submit
+                  {t('delivery.submit')}
                 </button>
               </div>
             </>
@@ -430,7 +432,7 @@ export function DeliveryPage() {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Take Photo</h3>
+                <h3 className="text-lg font-semibold text-gray-900">{t('delivery.takePhoto')}</h3>
                 <button
                   onClick={handleClosePhoto}
                   className="text-gray-400 hover:text-gray-600"
@@ -456,14 +458,14 @@ export function DeliveryPage() {
                       className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
                     >
                       <Camera className="w-5 h-5" />
-                      Take Picture
+                      {t('delivery.takePicture')}
                     </button>
                     <button
                       onClick={handleFlipCamera}
                       className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
                     >
                       <FlipHorizontal className="w-5 h-5" />
-                      Flip Camera
+                      {t('delivery.flipCamera')}
                     </button>
                   </div>
                 </>
@@ -478,14 +480,14 @@ export function DeliveryPage() {
                       className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                     >
                       <Check className="w-5 h-5" />
-                      Use Photo
+                      {t('delivery.usePhoto')}
                     </button>
                     <button
                       onClick={handleRetake}
                       className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
                     >
                       <X className="w-5 h-5" />
-                      Retake
+                      {t('delivery.retake')}
                     </button>
                   </div>
                 </>
