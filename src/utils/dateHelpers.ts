@@ -135,3 +135,49 @@ export function formatDateForSupabase(dateString: string, time: string = '00:00'
   const [month, day, year] = dateString.split('/')
   return `${year}-${month}-${day} ${time}`
 }
+
+/**
+ * Calculate the number of expected visits based on frequency and date range
+ * @param frequencyVisit - Number of visits (e.g., "1", "2", "3")
+ * @param visitType - Type of visit period ("week" or "month")
+ * @param fromDate - Start date in MM/DD/YYYY format
+ * @param toDate - End date in MM/DD/YYYY format
+ * @returns number - Total expected visits in the date range
+ */
+export function calculateExpectedVisits(
+  frequencyVisit: string | number,
+  visitType: string,
+  fromDate: string,
+  toDate: string
+): number {
+  const frequency = parseInt(String(frequencyVisit)) || 0
+  if (frequency === 0) return 0
+
+  // Parse dates (MM/DD/YYYY format)
+  const parseDate = (dateStr: string): Date => {
+    const [month, day, year] = dateStr.split('/')
+    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+  }
+
+  const startDate = parseDate(fromDate)
+  const endDate = parseDate(toDate)
+
+  // Calculate the number of days in the range
+  const millisecondsPerDay = 1000 * 60 * 60 * 24
+  const daysInRange = Math.ceil((endDate.getTime() - startDate.getTime()) / millisecondsPerDay) + 1
+
+  const normalizedVisitType = visitType.toLowerCase().trim()
+
+  if (normalizedVisitType === 'week') {
+    // Calculate number of complete weeks + partial week
+    const weeks = daysInRange / 7
+    return Math.ceil(weeks * frequency)
+  } else if (normalizedVisitType === 'month') {
+    // Calculate number of months (approximate)
+    const months = daysInRange / 30.44 // Average days in a month
+    return Math.ceil(months * frequency)
+  }
+
+  // If visitType is not recognized, return the frequency as-is
+  return frequency
+}

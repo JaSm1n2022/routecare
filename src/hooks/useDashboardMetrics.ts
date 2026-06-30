@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
-import { getThisWeekDateRange, getThisMonthDateRange, getPayrollCutoffDateRange, formatDateForSupabase } from '../utils/dateHelpers'
+import { getThisWeekDateRange, getThisMonthDateRange, getPayrollCutoffDateRange, formatDateForSupabase, calculateExpectedVisits } from '../utils/dateHelpers'
 
 interface Assignment {
   id: string
@@ -240,9 +240,15 @@ export function useDashboardMetrics(): DashboardMetrics {
       // Calculate metrics
       const assignedPatients = assignments.length
 
-      // Calculate scheduled visits (sum of frequencyVisit from assignments)
+      // Calculate scheduled visits based on frequency, visitType, and date range
       const scheduledVisits = assignments.reduce((total, assignment) => {
-        return total + (parseInt(assignment.frequencyVisit || '0'))
+        const expectedVisits = calculateExpectedVisits(
+          assignment.frequencyVisit,
+          assignment.visitType,
+          dateRange.from,
+          dateRange.to
+        )
+        return total + expectedVisits
       }, 0)
 
       // Completed visits = number of routesheets this week
@@ -257,10 +263,20 @@ export function useDashboardMetrics(): DashboardMetrics {
       })
 
       assignments.forEach((assignment, index) => {
+        // Calculate expected visits based on frequency, visitType, and date range
+        const expectedVisits = calculateExpectedVisits(
+          assignment.frequencyVisit,
+          assignment.visitType,
+          dateRange.from,
+          dateRange.to
+        )
+
         console.log(`\n📋 Assignment ${index + 1}:`, {
           patientCd: assignment.patientCd,
           visitType: assignment.visitType,
-          frequencyVisit: assignment.frequencyVisit
+          frequencyVisit: assignment.frequencyVisit,
+          dateRange: `${dateRange.from} to ${dateRange.to}`,
+          expectedVisits
         })
 
         // Default service type is "Regular Visit" for assignments
@@ -308,9 +324,8 @@ export function useDashboardMetrics(): DashboardMetrics {
         }
 
         if (contract) {
-          const visits = parseInt(assignment.frequencyVisit || '0')
-          const lineTotal = contract.serviceRate * visits
-          console.log(`💵 Adding to total: ${visits} visits × $${contract.serviceRate} = $${lineTotal}`)
+          const lineTotal = contract.serviceRate * expectedVisits
+          console.log(`💵 Adding to total: ${expectedVisits} visits × $${contract.serviceRate} = $${lineTotal}`)
           estimatedPayment += lineTotal
         }
       })
