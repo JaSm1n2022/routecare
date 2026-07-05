@@ -97,7 +97,12 @@
     "submitSuccess": "Route sheet submitted successfully!",
     "submitError": "Failed to submit route sheet",
     "pleaseDrawSignature": "Please draw your signature",
-    "pleaseTypeName": "Please type your name"
+    "pleaseTypeName": "Please type your name",
+    "noContractFound": "Unable to estimate payment automatically",
+    "noContractFoundDesc": "We couldn't find a contract rate for this service. Please enter your service rate below.",
+    "enterServiceRate": "Enter Service Rate",
+    "serviceRatePlaceholder": "Enter rate (e.g., 45.00)",
+    "manualRate": "Manual Rate"
   },
   "pickup": {
     "title": "Pickup Tracking",

@@ -97,7 +97,12 @@
     "submitSuccess": "¡Hoja de ruta enviada exitosamente!",
     "submitError": "Error al enviar la hoja de ruta",
     "pleaseDrawSignature": "Por favor dibuje su firma",
-    "pleaseTypeName": "Por favor escriba su nombre"
+    "pleaseTypeName": "Por favor escriba su nombre",
+    "noContractFound": "No se puede estimar el pago automáticamente",
+    "noContractFoundDesc": "No pudimos encontrar una tarifa de contrato para este servicio. Por favor ingrese su tarifa de servicio a continuación.",
+    "enterServiceRate": "Ingresar Tarifa de Servicio",
+    "serviceRatePlaceholder": "Ingrese tarifa (ej., 45.00)",
+    "manualRate": "Tarifa Manual"
   },
   "pickup": {
     "title": "Seguimiento de Recogida",

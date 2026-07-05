@@ -8,8 +8,7 @@ import { MobileSelect } from '../components/MobileSelect'
 import { getThisWeekDateRange, getThisMonthDateRange, getPayrollCutoffDateRange } from '../utils/dateHelpers'
 import dayjs from 'dayjs'
 import { pdf } from '@react-pdf/renderer'
-import { RoutesheetPrintDocument } from '../components/RoutesheetPrintDocument'
-import { getImageBase64 } from '../utils/helper'
+import RouteSheetDocument, { RouteVisit } from '../components/RouteSheetDocument'
 import toast from 'react-hot-toast'
 import SignatureCanvas from 'react-signature-canvas'
 import { useTranslation } from 'react-i18next'
@@ -191,25 +190,45 @@ export function EarningsPage() {
       setPrintLoading(true)
       toast.loading(t('earnings.generatingPdf'), { id: 'pdf-generation' })
 
-      // Load logo from Supabase
-      const logoUrl = 'https://acwocotrngkeaxtzdzfz.supabase.co/storage/v1/object/public/images/headerdoc.png'
-      let logoBase64: string | undefined = undefined
+      // Transform routesheets data to RouteVisit format
+      const visits: RouteVisit[] = routesheets.map(sheet => {
+        // Normalize patient code - remove digits and dots
+        const client = sheet.patientCd
+          ?.replace(/\d/g, '')
+          ?.replace(/\./g, '')
+          ?.trim() || ''
 
-      try {
-        logoBase64 = await getImageBase64(logoUrl)
-        console.log('✅ Logo loaded successfully')
-      } catch (error) {
-        console.error('⚠️ Failed to load logo, continuing without it:', error)
-        // Continue without logo if it fails to load
-      }
+        // Extract time from dosStart/dosEnd if timeIn/timeOut not available
+        const timeIn = sheet.timeIn || dayjs(sheet.dosStart).format('HH:mm')
+        const timeOut = sheet.timeOut || (sheet.dosEnd ? dayjs(sheet.dosEnd).format('HH:mm') : '')
 
-      // Generate PDF
+        return {
+          client,
+          serviceCode: sheet.serviceCd || '',
+          date: sheet.dosStart, // ISO date string
+          timeIn,
+          timeOut,
+          signatureImage: sheet.signature_based,
+          signatureName: employee?.name,
+          rate: parseFloat(sheet.estimatedPayment?.toString() || '0'),
+          comment: sheet.comments || ''
+        }
+      })
+
+      // Determine reporting period from date range
+      const period = `${dayjs(dateStart).format('MMMM YYYY')}`
+
+      // Generate PDF with new RouteSheetDocument
       const pdfDocument = (
-        <RoutesheetPrintDocument
-          routesheets={routesheets}
-          employeeName={employee?.name || ''}
-          position={employee?.position || ''}
-          logoBase64={logoBase64}
+        <RouteSheetDocument
+          data={{
+            staffName: employee?.name || '',
+            credential: '', // Add credential if available in employee data
+            position: employee?.position || '',
+            period,
+            visits,
+            minRows: 20
+          }}
         />
       )
 
@@ -217,7 +236,7 @@ export function EarningsPage() {
 
       // Create filename with date
       const dateStr = dayjs().format('YYYY-MM-DD')
-      const filename = `routesheet_${dateStr}.pdf`
+      const filename = `route_sheet_${dateStr}.pdf`
 
       // Download the PDF
       const link = document.createElement('a')
@@ -313,11 +332,23 @@ export function EarningsPage() {
     // Helper function to check if service is a visit type
     const isVisitService = (serviceName: string) => {
       const lowerService = serviceName.toLowerCase()
-      return lowerService.includes('visit') ||
-             lowerService === 'rv' ||
-             lowerService === t('services.regularVisit').toLowerCase() ||
-             lowerService === 'swv' ||
-             lowerService === t('services.socialWorkerVisit').toLowerCase()
+      // Services that contain "visit" in the name
+      if (lowerService.includes('visit')) return true
+
+      // Additional service codes and names that should get "Visit Completed" comment
+      const visitServices = [
+        'rv', 'swv', 'huv', 'sfv', 'prn',
+        t('services.regularVisit').toLowerCase(),
+        t('services.socialWorkerVisit').toLowerCase(),
+        t('services.huv').toLowerCase(),
+        t('services.sfv').toLowerCase(),
+        t('services.prn').toLowerCase(),
+        t('services.socAssessment').toLowerCase(),
+        t('services.deathPronouncement').toLowerCase(),
+        t('services.discharge').toLowerCase()
+      ]
+
+      return visitServices.some(service => lowerService === service || lowerService.includes(service))
     }
 
     // Parse comments - check if it matches a predefined option
@@ -410,25 +441,47 @@ export function EarningsPage() {
       // Helper function to check if service is a visit type
       const isVisitService = (serviceName: string) => {
         const lowerService = serviceName.toLowerCase()
-        return lowerService.includes('visit') ||
-               lowerService === 'rv' ||
-               lowerService === t('services.regularVisit').toLowerCase() ||
-               lowerService === 'swv' ||
-               lowerService === t('services.socialWorkerVisit').toLowerCase()
+        // Services that contain "visit" in the name
+        if (lowerService.includes('visit')) return true
+
+        // Additional service codes and names that should get "Visit Completed" comment
+        const visitServices = [
+          'rv', 'swv', 'huv', 'sfv', 'prn',
+          t('services.regularVisit').toLowerCase(),
+          t('services.socialWorkerVisit').toLowerCase(),
+          t('services.huv').toLowerCase(),
+          t('services.sfv').toLowerCase(),
+          t('services.prn').toLowerCase(),
+          t('services.socAssessment').toLowerCase(),
+          t('services.deathPronouncement').toLowerCase(),
+          t('services.discharge').toLowerCase()
+        ]
+
+        return visitServices.some(service => lowerService === service || lowerService.includes(service))
       }
 
-      // Always set default comment based on service type when service changes
+      // Always reset and set default comment based on service type when service changes
       if (value === t('services.potentialAdmissionVisit')) {
         setEditForm(prev => ({
           ...prev,
           service: value,
-          selectedComment: 'Other'
+          selectedComment: 'Other',
+          otherComments: ''
         }))
       } else if (isVisitService(value)) {
         setEditForm(prev => ({
           ...prev,
           service: value,
-          selectedComment: 'Visit Completed – No Issues'
+          selectedComment: 'Visit Completed – No Issues',
+          otherComments: ''
+        }))
+      } else {
+        // For all other services (IDT, Staff Meeting, etc.), reset to empty
+        setEditForm(prev => ({
+          ...prev,
+          service: value,
+          selectedComment: '',
+          otherComments: ''
         }))
       }
     }

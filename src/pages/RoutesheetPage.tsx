@@ -118,6 +118,10 @@ export function RoutesheetPage() {
   const [contracts, setContracts] = useState<Contract[]>([])
   const [contract, setContract] = useState<Contract | null>(null)
 
+  // Manual rate input when no contract found
+  const [manualRate, setManualRate] = useState<string>('')
+  const [showManualRateInput, setShowManualRateInput] = useState(false)
+
   // Errors
   const [errors, setErrors] = useState({
     patient: '',
@@ -239,20 +243,37 @@ export function RoutesheetPage() {
     // Helper function to check if service is a visit type
     const isVisitService = (name: string) => {
       const lowerService = name.toLowerCase()
-      return lowerService.includes('visit') ||
-             lowerService === 'rv' ||
-             lowerService === t('services.regularVisit').toLowerCase() ||
-             lowerService === 'swv' ||
-             lowerService === t('services.socialWorkerVisit').toLowerCase()
+      // Services that contain "visit" in the name
+      if (lowerService.includes('visit')) return true
+
+      // Additional service codes and names that should get "Visit Completed" comment
+      const visitServices = [
+        'rv', 'swv', 'huv', 'sfv', 'prn',
+        t('services.regularVisit').toLowerCase(),
+        t('services.socialWorkerVisit').toLowerCase(),
+        t('services.huv').toLowerCase(),
+        t('services.sfv').toLowerCase(),
+        t('services.prn').toLowerCase(),
+        t('services.socAssessment').toLowerCase(),
+        t('services.deathPronouncement').toLowerCase(),
+        t('services.discharge').toLowerCase()
+      ]
+
+      return visitServices.some(service => lowerService === service || lowerService.includes(service))
     }
 
-    // Always set default comment based on service type when service changes
+    // Always reset and set default comment based on service type when service changes
     if (serviceName === t('services.potentialAdmissionVisit')) {
       setComments('Other')
       console.log('✅ Default comment set to Other for Potential Admission Visit')
     } else if (isVisitService(serviceName)) {
       setComments('Visit Completed – No Issues')
       console.log('✅ Default comment set to Visit Completed for visit service')
+    } else {
+      // For all other services (IDT, Staff Meeting, etc.), reset to empty
+      setComments('')
+      setOtherComments('')
+      console.log('✅ Comment reset to empty for non-visit service')
     }
 
     console.log('📝 Service changed:', serviceName, 'Client required:', selectedService?.isClientRequired)
@@ -281,6 +302,7 @@ export function RoutesheetPage() {
     }
 
     setContract(foundContract || null)
+    setShowManualRateInput(!foundContract)
     console.log('💰 Contract found:', foundContract)
   }, [selectedPatient, service, contracts, employee, isClientRequired])
 
@@ -315,6 +337,11 @@ export function RoutesheetPage() {
   }
 
   const calculateEstimatedPayment = () => {
+    // Use manual rate if no contract found
+    if (!contract && manualRate) {
+      return parseFloat(manualRate) || 0
+    }
+
     if (!contract) return 0
 
     let servicePayment = parseFloat(contract.serviceRate?.toString() || '0')
@@ -399,8 +426,8 @@ export function RoutesheetPage() {
         requestorTitle: employee?.position,
         mileage: mileage || 0,
         isMileageRate: contract?.isMileageRate || false,
-        serviceRate: contract?.serviceRate || 0,
-        serviceRateType: contract?.serviceRateType || '',
+        serviceRate: contract?.serviceRate || parseFloat(manualRate) || 0,
+        serviceRateType: contract?.serviceRateType || 'flat',
         mileageRate: contract?.mileageRate || 0,
         mileageMaxReimbursement: contract?.maxReimbursement || 0,
         mileageCost: contract?.mileageRate ? contract.mileageRate * mileage : 0,
@@ -724,6 +751,40 @@ export function RoutesheetPage() {
               )}
             </div>
           </div>
+
+          {/* Manual Rate Input - When no contract found */}
+          {showManualRateInput && service && (
+            <div className="bg-yellow-50 p-6 rounded-lg shadow border-2 border-yellow-200">
+              <h2 className="text-lg font-semibold text-yellow-800 mb-2">
+                {t('routesheet.noContractFound')}
+              </h2>
+              <p className="text-sm text-yellow-700 mb-4">
+                {t('routesheet.noContractFoundDesc')}
+              </p>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('routesheet.enterServiceRate')} <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={manualRate}
+                  onChange={(e) => setManualRate(e.target.value)}
+                  className="w-full px-4 py-2 border border-yellow-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  placeholder={t('routesheet.serviceRatePlaceholder')}
+                />
+              </div>
+              {manualRate && (
+                <div className="mt-4 pt-4 border-t border-yellow-200">
+                  <p className="text-sm text-yellow-700 mb-1">{t('routesheet.estimatedPayment')}:</p>
+                  <p className="text-2xl font-bold text-yellow-900">
+                    ${parseFloat(manualRate || '0').toFixed(2)}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Estimated Payment */}
           {contract && (
