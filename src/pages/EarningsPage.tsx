@@ -9,6 +9,7 @@ import { getThisWeekDateRange, getThisMonthDateRange, getPayrollCutoffDateRange 
 import dayjs from 'dayjs'
 import { pdf } from '@react-pdf/renderer'
 import RouteSheetDocument, { RouteVisit } from '../components/RouteSheetDocument'
+import { getImageBase64 } from '../utils/helper'
 import toast from 'react-hot-toast'
 import SignatureCanvas from 'react-signature-canvas'
 import { useTranslation } from 'react-i18next'
@@ -190,6 +191,18 @@ export function EarningsPage() {
       setPrintLoading(true)
       toast.loading(t('earnings.generatingPdf'), { id: 'pdf-generation' })
 
+      // Load header image from Supabase
+      const headerUrl = 'https://acwocotrngkeaxtzdzfz.supabase.co/storage/v1/object/public/images/headerdoc.png'
+      let headerBase64: string | undefined = undefined
+
+      try {
+        headerBase64 = await getImageBase64(headerUrl)
+        console.log('✅ Header image loaded successfully')
+      } catch (error) {
+        console.error('⚠️ Failed to load header image, continuing without it:', error)
+        // Continue without header if it fails to load
+      }
+
       // Transform routesheets data to RouteVisit format
       const visits: RouteVisit[] = routesheets.map(sheet => {
         // Normalize patient code - remove digits and dots
@@ -227,7 +240,8 @@ export function EarningsPage() {
             position: employee?.position || '',
             period,
             visits,
-            minRows: 20
+            minRows: 20,
+            headerImageBase64: headerBase64
           }}
         />
       )

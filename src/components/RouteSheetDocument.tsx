@@ -33,6 +33,7 @@ export interface RouteVisit {
 export interface RouteSheetData {
   staffName: string; credential?: string; position: string;
   period: string; visits: RouteVisit[]; minRows?: number;
+  headerImageBase64?: string;
 }
 
 const C = {
@@ -56,6 +57,9 @@ export const SERVICE_CODES: [string, string][] = [
 const s = StyleSheet.create({
   page: { paddingTop:36, paddingRight:40, paddingBottom:30, paddingLeft:40,
           fontFamily:'Inter', fontSize:8, color:C.ink, backgroundColor:C.white },
+
+  // header image
+  headerImage:{ width:'100%', height:80, objectFit:'contain', marginBottom:15 },
 
   // masthead
   head:{ flexDirection:'row', justifyContent:'space-between', alignItems:'flex-start' },
@@ -164,23 +168,29 @@ export default function RouteSheetDocument({ data }: { data: RouteSheetData }) {
     <Document>
       <Page size="LETTER" style={s.page}>
 
-        {/* masthead */}
-        <View style={s.head}>
-          <View style={s.brand}>
-            <Logo />
-            <View style={s.wm}>
-              <Text style={s.wmName}>HALOES <Text style={{ color: C.terra }}>TOUCH</Text></Text>
-              <Text style={s.wmTag}>HOSPICE  INC.</Text>
+        {/* header - use custom image if provided, otherwise use built-in masthead */}
+        {data.headerImageBase64 ? (
+          <Image src={data.headerImageBase64} style={s.headerImage} />
+        ) : (
+          <>
+            <View style={s.head}>
+              <View style={s.brand}>
+                <Logo />
+                <View style={s.wm}>
+                  <Text style={s.wmName}>HALOES <Text style={{ color: C.terra }}>TOUCH</Text></Text>
+                  <Text style={s.wmTag}>HOSPICE  INC.</Text>
+                </View>
+              </View>
+              <View style={s.contact}>
+                <Text style={s.contactOrg}>Haloes Touch Hospice Inc.</Text>
+                <Text>11500 S Eastern Ave, Ste. 150 #1509 · Henderson, NV 89052</Text>
+                <Text>Ph 702 625 4644 · Fax 702 960 4605 · hello@haloestouch.com</Text>
+                <Text>haloestouch.com</Text>
+              </View>
             </View>
-          </View>
-          <View style={s.contact}>
-            <Text style={s.contactOrg}>Haloes Touch Hospice Inc.</Text>
-            <Text>11500 S Eastern Ave, Ste. 150 #1509 · Henderson, NV 89052</Text>
-            <Text>Ph 702 625 4644 · Fax 702 960 4605 · hello@haloestouch.com</Text>
-            <Text>haloestouch.com</Text>
-          </View>
-        </View>
-        <View style={s.rule} />
+            <View style={s.rule} />
+          </>
+        )}
 
         {/* title */}
         <View style={s.titleRow}>
