@@ -223,8 +223,8 @@ export default function RouteSheetDocument({ data }: { data: RouteSheetData }) {
           <Text style={s.secNo}>01</Text><Text style={s.secH}>Visit Log</Text><View style={s.secFill} />
         </View>
 
-        {/* repeating header */}
-        <View style={s.tHead} fixed>
+        {/* table header */}
+        <View style={s.tHead}>
           <Text style={[s.th, { width: W.client }]}>Client</Text>
           <Text style={[s.th, { width: W.code }]}>Service Code</Text>
           <Text style={[s.th, { width: W.date }, s.ctr]}>Date</Text>
