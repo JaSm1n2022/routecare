@@ -228,22 +228,8 @@ export function EarningsPage() {
         }
       })
 
-      // Determine reporting period from actual visit dates (min to max)
-      let period = ''
-      if (visits.length > 0) {
-        // Filter out blank rows and get actual dates
-        const actualVisits = visits.filter(v => v.client && v.date)
-        if (actualVisits.length > 0) {
-          const dates = actualVisits.map(v => dayjs(v.date))
-          const minDate = dates.reduce((min, d) => d.isBefore(min) ? d : min)
-          const maxDate = dates.reduce((max, d) => d.isAfter(max) ? d : max)
-          period = `${minDate.format('MMM D, YYYY')} - ${maxDate.format('MMM D, YYYY')}`
-        } else {
-          period = `${dayjs(dateStart).format('MMM D, YYYY')} - ${dayjs(dateEnd).format('MMM D, YYYY')}`
-        }
-      } else {
-        period = `${dayjs(dateStart).format('MMM D, YYYY')} - ${dayjs(dateEnd).format('MMM D, YYYY')}`
-      }
+      // Use the filter date range as the reporting period
+      const period = `${dayjs(dateStart).format('MMM D, YYYY')} - ${dayjs(dateEnd).format('MMM D, YYYY')}`
 
       // Generate PDF with new RouteSheetDocument
       const pdfDocument = (
