@@ -125,7 +125,8 @@ export function RoutesheetPage() {
   // Errors
   const [errors, setErrors] = useState({
     patient: '',
-    signature: ''
+    signature: '',
+    date: ''
   })
 
   // Filter services based on employee position and set default
@@ -372,7 +373,7 @@ export function RoutesheetPage() {
 
     // Validate
     let isValid = true
-    const newErrors = { patient: '', signature: '' }
+    const newErrors = { patient: '', signature: '', date: '' }
 
     if (!service) {
       toast.error(t('routesheet.pleaseSelectService'))
@@ -393,6 +394,17 @@ export function RoutesheetPage() {
     // Validate "Other" comments
     if (comments === 'Other' && !otherComments.trim()) {
       toast.error(t('routesheet.pleaseSpecifyComment'))
+      isValid = false
+    }
+
+    // Validate date - cannot be future or next day
+    const today = dayjs().startOf('day')
+    const selectedDate = dayjs(serviceDate).startOf('day')
+    const tomorrow = today.add(1, 'day')
+
+    if (selectedDate.isAfter(today) || selectedDate.isSame(tomorrow)) {
+      newErrors.date = 'Service date cannot be in the future or next day'
+      toast.error('Service date cannot be in the future or next day. Please select today or a past date.')
       isValid = false
     }
 
@@ -609,9 +621,27 @@ export function RoutesheetPage() {
                 <input
                   type="date"
                   value={serviceDate}
-                  onChange={(e) => setServiceDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  max={dayjs().format('YYYY-MM-DD')}
+                  onChange={(e) => {
+                    const selectedDate = dayjs(e.target.value).startOf('day')
+                    const today = dayjs().startOf('day')
+                    const tomorrow = today.add(1, 'day')
+
+                    if (selectedDate.isAfter(today) || selectedDate.isSame(tomorrow)) {
+                      setErrors({ ...errors, date: 'Cannot select future or next day' })
+                      toast.error('Service date cannot be in the future or next day')
+                    } else {
+                      setErrors({ ...errors, date: '' })
+                    }
+                    setServiceDate(e.target.value)
+                  }}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.date ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 />
+                {errors.date && (
+                  <p className="text-red-500 text-sm mt-1">{errors.date}</p>
+                )}
               </div>
 
               <div>
