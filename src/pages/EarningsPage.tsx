@@ -240,7 +240,7 @@ export function EarningsPage() {
             position: employee?.position || '',
             period,
             visits,
-            minRows: 20,
+            minRows: 18,
             headerImageBase64: headerBase64
           }}
         />

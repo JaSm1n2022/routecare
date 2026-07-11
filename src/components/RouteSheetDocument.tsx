@@ -157,7 +157,7 @@ const initials = (name: string) =>
   name.trim().split(/\s+/).map(p => p[0]).slice(0,2).join('').toUpperCase();
 
 export default function RouteSheetDocument({ data }: { data: RouteSheetData }) {
-  const minRows = data.minRows ?? 20;
+  const minRows = data.minRows ?? 18;
   const rows: RouteVisit[] = [...data.visits];
   while (rows.length < minRows) {
     rows.push({ client:'', serviceCode:'', date:'', timeIn:'', timeOut:'' });
