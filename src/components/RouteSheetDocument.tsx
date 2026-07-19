@@ -163,6 +163,7 @@ export default function RouteSheetDocument({ data }: { data: RouteSheetData }) {
     rows.push({ client:'', serviceCode:'', date:'', timeIn:'', timeOut:'' });
   }
   const total = data.visits.reduce((sum, v) => sum + (v.rate ?? 0), 0);
+  const totalServices = data.visits.length;
 
   return (
     <Document>
@@ -260,6 +261,10 @@ export default function RouteSheetDocument({ data }: { data: RouteSheetData }) {
         {/* total */}
         <View style={s.total}>
           <View style={s.totalBox}>
+            <Text style={s.totalLbl}>Total Services</Text>
+            <Text style={s.totalAmt}>{totalServices}</Text>
+          </View>
+          <View style={[s.totalBox, { marginLeft: 8 }]}>
             <Text style={s.totalLbl}>Total Earnings</Text>
             <Text style={s.totalAmt}><Text style={s.totalCur}>$</Text>{total.toFixed(2)}</Text>
           </View>
