@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 import { getThisWeekDateRange, getThisMonthDateRange, getPayrollCutoffDateRange, formatDateForSupabase, calculateExpectedVisits } from '../utils/dateHelpers'
+import dayjs from 'dayjs'
 
 interface Assignment {
   id: string
@@ -172,14 +173,31 @@ export function useDashboardMetrics(): DashboardMetrics {
         console.log('🔍 Debug - Existing disciplineIds in assignments:', disciplineIds)
       }
 
+      // Determine date filter based on employee position
+      // Chaplain: 365 days (except for non-bereavement)
+      // All others: 30 days
+      const isChaplain = employee?.position?.trim() === 'Chaplain'
+      const daysAgo = isChaplain ? 365 : 30
+      const filterDate = dayjs().subtract(daysAgo, 'day').format('YYYY-MM-DD')
+
+      // Build assignments query
+      let assignmentsQuery = supabase
+        .from('assignments')
+        .select('*')
+        .eq('companyId', companyId)
+        .eq('disciplineId', employeeId)
+        .or(`eoc_dt.is.null,eoc_dt.gte.${filterDate}`)
+
+      // For Chaplain, only show bereavement assignments (is_bereavement = true or null)
+      if (isChaplain) {
+        assignmentsQuery = assignmentsQuery.or('is_bereavement.is.null,is_bereavement.eq.true')
+      }
+
       // Fetch all data in parallel
       const [assignmentsResult, routesheetsResult, contractsResult] = await Promise.all([
         // 1. Fetch assignments (assigned patients + scheduled visits)
-        supabase
-          .from('assignments')
-          .select('*')
-          .eq('companyId', companyId)
-          .eq('disciplineId', employeeId),
+        // Filter where eoc_dt is null OR eoc_dt is within the date range
+        assignmentsQuery,
 
         // 2. Fetch routesheets (completed visits this week)
         supabase

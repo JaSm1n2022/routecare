@@ -175,12 +175,28 @@ export function RoutesheetPage() {
       const companyId = employee?.companyId
       const employeeId = employee?.id
 
-      // Fetch assignments
-      const { data: assignmentData, error: assignmentError } = await supabase
+      // Determine date filter based on employee position
+      // Chaplain: 365 days (except for non-bereavement)
+      // All others: 30 days
+      const isChaplain = employee?.position?.trim() === 'Chaplain'
+      const daysAgo = isChaplain ? 365 : 30
+      const filterDate = dayjs().subtract(daysAgo, 'day').format('YYYY-MM-DD')
+
+      // Fetch assignments where eoc_dt is null OR eoc_dt is within the date range
+      // For Chaplain: also filter based on is_bereavement
+      let query = supabase
         .from('assignments')
         .select('*')
         .eq('companyId', companyId)
         .eq('disciplineId', employeeId)
+        .or(`eoc_dt.is.null,eoc_dt.gte.${filterDate}`)
+
+      // For Chaplain, only show bereavement assignments (is_bereavement = true or null)
+      if (isChaplain) {
+        query = query.or('is_bereavement.is.null,is_bereavement.eq.true')
+      }
+
+      const { data: assignmentData, error: assignmentError } = await query
 
       if (assignmentError) throw assignmentError
 
