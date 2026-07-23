@@ -174,24 +174,21 @@ export function useDashboardMetrics(): DashboardMetrics {
       }
 
       // Determine date filter based on employee position
-      // Chaplain: 365 days (except for non-bereavement)
+      // Chaplain: 365 days (bereavement only applies when eoc_dt is not null)
       // All others: 30 days
       const isChaplain = employee?.position?.trim() === 'Chaplain'
       const daysAgo = isChaplain ? 365 : 30
       const filterDate = dayjs().subtract(daysAgo, 'day').format('YYYY-MM-DD')
 
       // Build assignments query
-      let assignmentsQuery = supabase
+      // Note: For Chaplain, bereavement filter is applied in JavaScript after fetching
+      // because bereavement only matters when eoc_dt is NOT null
+      const assignmentsQuery = supabase
         .from('assignments')
         .select('*')
         .eq('companyId', companyId)
         .eq('disciplineId', employeeId)
         .or(`eoc_dt.is.null,eoc_dt.gte.${filterDate}`)
-
-      // For Chaplain, only show bereavement assignments (is_bereavement = true or null)
-      if (isChaplain) {
-        assignmentsQuery = assignmentsQuery.or('is_bereavement.is.null,is_bereavement.eq.true')
-      }
 
       // Fetch all data in parallel
       const [assignmentsResult, routesheetsResult, contractsResult] = await Promise.all([
@@ -235,9 +232,23 @@ export function useDashboardMetrics(): DashboardMetrics {
         throw contractsResult.error
       }
 
-      const assignments = assignmentsResult.data || []
+      let assignments = assignmentsResult.data || []
       const routesheets = routesheetsResult.data || []
       const contracts = contractsResult.data || []
+
+      // For Chaplain: Apply bereavement filter only when eoc_dt is NOT null
+      // If eoc_dt is null → show regardless of bereavement status
+      // If eoc_dt is not null → only show if is_bereavement is true or null
+      if (isChaplain) {
+        assignments = assignments.filter(assignment => {
+          // If eoc_dt is null, always show (ignore bereavement)
+          if (!assignment.eoc_dt) {
+            return true
+          }
+          // If eoc_dt is not null, only show if bereavement is true or null
+          return assignment.is_bereavement === true || assignment.is_bereavement === null
+        })
+      }
 
       console.log('✅ Data fetched:', {
         assignments: assignments.length,
