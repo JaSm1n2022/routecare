@@ -45,6 +45,13 @@ export function MobileSelect({
     setSearchQuery('')
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && filteredOptions.length > 0) {
+      e.preventDefault()
+      handleSelect(filteredOptions[0].value)
+    }
+  }
+
   return (
     <div className="relative">
       {label && (
@@ -90,6 +97,7 @@ export function MobileSelect({
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={handleKeyDown}
                     placeholder="Type to search..."
                     className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                     onClick={(e) => e.stopPropagation()}

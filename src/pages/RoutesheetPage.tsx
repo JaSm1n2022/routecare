@@ -616,6 +616,7 @@ export function RoutesheetPage() {
                     onChange={handlePatientChange}
                     options={patients.map(p => ({ value: p, label: p }))}
                     placeholder={t('routesheet.selectClientPlaceholder')}
+                    searchable
                     error={!!errors.patient}
                   />
                   {errors.patient && (

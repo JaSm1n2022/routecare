@@ -293,6 +293,7 @@ export function DeliveryPage() {
                 ...clients.map(c => ({ value: c, label: c }))
               ]}
               placeholder={t('delivery.selectOne')}
+              searchable
             />
             {clients.length === 0 && !loading && (
               <p className="mt-2 text-sm text-amber-600">
