@@ -21,7 +21,7 @@ const getClientServices = (t: any) => [
   { code: "IDT-NT", name: t('services.idtMeetingThruNotes'), isClientRequired: false, permission: ["*"] },
   { code: "IDT-PH", name: t('services.idtMeetingViaPhone'), isClientRequired: false, permission: ["*"] },
   { code: "OC", name: t('services.onCall'), isClientRequired: false, permission: ["*"] },
-  { code: "RC", name: t('services.recertificationVisit'), isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse"] },
+  { code: "RC", name: t('services.recertificationVisit'), isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse", "Chaplain"] },
   { code: "SM", name: t('services.staffMeeting'), isClientRequired: false, permission: ["*"] },
   { code: "IN", name: t('services.inService'), isClientRequired: false, permission: ["*"] },
   { code: "EV", name: t('services.evaluationVisit'), isClientRequired: true, permission: ["Case Manager", "Registered Nurse", "Director of Nurse", "Nurse Practioner"] },
